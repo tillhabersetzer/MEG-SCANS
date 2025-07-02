@@ -134,7 +134,8 @@ cfg.channel               = chantype;
 cfg.sourcemodel.pos       = dippos;
 cfg.sourcemodel.unit      = unit;
 cfg.headmodel             = headmodel;                
-cfg.singleshell.batchsize = 5000;                      
+% cfg.singleshell.batchsize = 5000;     
+cfg.sourcemodel.inside    = [1,1]; % assume both dipoles are inside even if they are not
 lf                        = ft_prepare_leadfield(cfg);
 
 % Apply orientation constraint to leadfield

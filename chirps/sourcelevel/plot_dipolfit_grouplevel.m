@@ -2,7 +2,22 @@
 % Till Habersetzer, 24.06.2025
 % Communication Acoustics, CvO University Oldenburg
 % till.habersetzer@uol.de 
+% 
+% Group Analysis and Visualization of Dipole Fits
 %
+% This script performs a group-level analysis of MEG dipole fitting 
+% results obtained from a chirp stimulus experiment.
+%
+% Key steps:
+% 1. Loads pre-computed dipole data for a specified range of subjects.
+% 2. Performs quality control using the `check_dipolefitting` subfunction 
+%    to exclude subjects with poor fits (e.g., unilateral or outlier dipoles).
+% 3. Calculates the group-average dipole positions, moments, and time courses
+%    for the left and right hemispheres, along with the standard error of the mean.
+% 4. Generates visualizations:
+%    - A 3D plot of individual and mean dipoles on a template MRI.
+%    - Plots of the grand-average dipole moment time courses (both vector 
+%      components and scalar magnitude) for each hemisphere.
 %--------------------------------------------------------------------------
 
 close all
@@ -26,8 +41,8 @@ subjects  = 2:24;
 n_subj    = length(subjects);
 
 chan2plot         = 'megplanar'; % 'megmag' 'megplanar'
-time2plot         = [-100 500]; % for dipole timecourse
-timewin_dipolefit = settings.timewindow_dipfit;
+time2plot         = [-100 400]; % for dipole timecourse
+timewin_dipolefit = settings.timewindow_dipfit*1000; % in ms
 
 %% Import data
 %--------------------------------------------------------------------------
@@ -128,7 +143,6 @@ for sub_idx = find(idx_good_subject)
     counter = counter + 1;
 end
 
-%%
 % Compute mean values
 %--------------------
 avg_dipole_position       = [squeeze(mean(dipole_positions_left,1));squeeze(mean(dipole_positions_right,1))];
@@ -155,8 +169,25 @@ end
 ft_plot_dipole(avg_dipole_position(1,:), mean(avg_dipole_moment(1:3,:),2), 'color', [0.6350, 0.0780, 0.1840], 'unit', 'mm','thickness', 5, 'length', 20, 'diameter', 10)
 ft_plot_dipole(avg_dipole_position(2,:), mean(avg_dipole_moment(4:6,:),2), 'color', [0.6350, 0.0780, 0.1840], 'unit', 'mm','thickness', 5, 'length', 20, 'diameter', 10)
 
-pos    = mean(avg_dipole_position,1);
-pos(1) = 0; % center x-axis
+% Position of crosshair - Heschl_R or mean dipole position (center x-axis)
+%--------------------------------------------------------------------------
+cfg         = [];
+cfg.atlas   = atlas;
+cfg.roi     = {'Heschl_R'};
+mask_heschl = ft_volumelookup(cfg, atlas);
+% Compute mean
+linear_indices                = find(mask_heschl);
+[row_idx, col_idx, slice_idx] = ind2sub(size(mask_heschl), linear_indices); % Convert linear indices to 3D subscripts (i, j, k voxel coordinates)
+voxel_coords                  = [row_idx, col_idx, slice_idx, ones(length(linear_indices), 1)]'; % Combine these into a matrix where each row is a voxel coordinate (i,j,k), add 1 for homogeneous coordinates
+coords_mni_homogeneous        = atlas.transform * voxel_coords; % 4. Transform voxel coordinates to mni coordinates
+coords_mni                    = coords_mni_homogeneous(1:3, :)'; % Transpose to N x 3 matrix
+pos                           = mean(coords_mni, 1); % Calculate the mean position
+
+% or use centered dipole position
+% pos    = mean(avg_dipole_position,1);
+% pos(1) = 0; % center x-axis
+%--------------------------------------------------------------------------
+
 ft_plot_slice(template_mri.anatomy, 'transform', template_mri.transform, 'location', pos, 'orientation', [1 0 0], 'resolution', 0.1)
 ft_plot_slice(template_mri.anatomy, 'transform', template_mri.transform, 'location', pos, 'orientation', [0 1 0], 'resolution', 0.1)
 ft_plot_slice(template_mri.anatomy, 'transform', template_mri.transform, 'location', pos, 'orientation', [0 0 1], 'resolution', 0.1)
@@ -193,148 +224,75 @@ maxval = max(avg_dipole_timecourse_vec+avg_dipole_timecourse_vec_sem,[],'all');
 
 name    = {'left hemisphere','right hemisphere'};
 timevec = sources_vec{1}.time*1000;  
-cmap    = {'r','g','b'}; %'x' 'y' 'z'
+cmap    = {"r","g","b"}; %'x' 'y' 'z'
 % Loop over both hemispheres
-figure('Name','Freely oriented dipole (fixed positions, loose orientation')
+figure('Name','Freely oriented dipole (fixed positions, loose orientation','Color','w')
 axisvec   = horzcat(time2plot,[minval,maxval]);
 
 for lr_idx = 1:2
     idxs2plot = (lr_idx-1)*3+(1:3); % 1:3 or 4:6
     
+    sp(lr_idx) = subplot(2,1,lr_idx); 
+    hold on
+    % add patch for dipole fit timewindow
+    patch([timewin_dipolefit(1), timewin_dipolefit(2), timewin_dipolefit(2), timewin_dipolefit(1)], ...
+          [maxval, maxval, minval, minval], ...
+                  [0.8,0.8,0.8], 'EdgeColor', 'none', 'FaceAlpha', 0.5);
     
-    subplot(2,1,lr_idx); 
-    % Plot dipole time courses
-    arrayfun(@(i) plot(timevec, avg_dipole_timecourse_vec(idxs2plot(i),:), '-', 'color',cmap{i},'LineWidth',2), 1:3)
-
+    % Plot dipole time courses and standard errors
     patch([timevec,fliplr(timevec)],[avg_dipole_timecourse_vec(idxs2plot(1),:)+avg_dipole_timecourse_vec_sem(idxs2plot(1),:),fliplr(avg_dipole_timecourse_vec(idxs2plot(1),:)-avg_dipole_timecourse_vec_sem(idxs2plot(1),:))],cmap{1},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
     patch([timevec,fliplr(timevec)],[avg_dipole_timecourse_vec(idxs2plot(2),:)+avg_dipole_timecourse_vec_sem(idxs2plot(2),:),fliplr(avg_dipole_timecourse_vec(idxs2plot(2),:)-avg_dipole_timecourse_vec_sem(idxs2plot(2),:))],cmap{2},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
     patch([timevec,fliplr(timevec)],[avg_dipole_timecourse_vec(idxs2plot(3),:)+avg_dipole_timecourse_vec_sem(idxs2plot(3),:),fliplr(avg_dipole_timecourse_vec(idxs2plot(3),:)-avg_dipole_timecourse_vec_sem(idxs2plot(3),:))],cmap{3},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
+    arrayfun(@(i) plot(timevec, avg_dipole_timecourse_vec(idxs2plot(i),:), '-', 'color',cmap{i},'LineWidth',2), 1:3) 
 
     if lr_idx ==2
         xlabel('t / ms')
     end
     ylabel('dipole moment / nAm'); 
-    legend({'x', 'y', 'z'},'Location','northwest');
+    legend(sp(1),{'dipolfit timewindow','x', 'y', 'z'},'Location','southwest');
     axis(axisvec) 
     grid on
     grid minor
     title(name{lr_idx})
     
 end
-sgtitle(sprintf('%s: %s',subject, chan2plot))
+sgtitle(sprintf('%s',chan2plot))
 
 
-%%
+%% (3.2) Fixed dipole, mean dipolmoment orientation as orientation constraint
+%--------------------------------------------------------------------------
 
-
-
-
-
-
-
-figure('Name','Freely oriented dipole (fixed positions, loose orientation')
-for i = 1:2
-    idx     = idxs(mapping(i),:);
-    axisvec = horzcat(time2plot,[minval,maxval]);
-    
-    subplot(2,1,i); 
-    plot(timevec, source_vec.dip.mom(idx,:), '-')
-    if i ==2
-        xlabel('t / ms')
-    end
-    ylabel('dipole moment / nAm'); 
-    legend({'x', 'y', 'z'});
-    axis(axisvec) 
-    grid on
-    title(name{i})
-    
-end
-sgtitle(sprintf('%s: %s',subject, chan2plot))
-
-
-
-
-
-
-% (3.2) Visualize fixed dipole (fixed orientation) 
-%-------------------------------------------------
-% mean dipolmoment orientation has been used as orientation constraint
-
-% Mapping between dipole locations and hemispheres
-%-------------------------------------------------
-pos     = dippos_nosym;
-mapping = check_diploc(pos); 
+minval = min(avg_dipole_timecourse_sca-avg_dipole_timecourse_sca_sem,[],'all');
+maxval = max(avg_dipole_timecourse_sca+avg_dipole_timecourse_sca_sem,[],'all');
 
 name    = {'left hemisphere','right hemisphere'};
-timevec = source_vec.time*1000; 
-minval  = min(source_sca_mean,[],'all');
-maxval  = max(source_sca_mean,[],'all');
+timevec = sources_vec{1}.time*1000;  
+% Loop over both hemispheres
+figure('Name','Freely oriented dipole (fixed positions, loose orientation','Color','w')
+axisvec   = horzcat(time2plot,[minval,maxval]);
+% line styles
+ls = {'-','--'};
 
-figure('Name','Fixed oriented dipole (fixed positions, fixed orientation')
-for i = 1:2
-
-    idx     = mapping(i);
-    axisvec = horzcat(time2plot,[minval,maxval]);
+hold on
+% add patch for dipole fit timewindow
+patch([timewin_dipolefit(1), timewin_dipolefit(2), timewin_dipolefit(2), timewin_dipolefit(1)], ...
+      [maxval, maxval, minval, minval], ...
+       'y', 'EdgeColor', 'none', 'FaceAlpha', 0.2);
+for lr_idx = 1:2
+   
+    % sp(lr_idx) = subplot(2,1,lr_idx);     
+    % Plot dipole time courses and standard errors
+    patch([timevec,fliplr(timevec)],[avg_dipole_timecourse_sca(lr_idx,:)+avg_dipole_timecourse_sca_sem(lr_idx,:),fliplr(avg_dipole_timecourse_sca(lr_idx,:)-avg_dipole_timecourse_sca_sem(lr_idx,:))],[0.8,0.8,0.8],'FaceAlpha',0.4,'LineStyle','none','HandleVisibility','off');
+    plot(timevec, avg_dipole_timecourse_sca(lr_idx, :), '-', 'color','k','LineWidth',2, 'LineStyle', ls{lr_idx})
     
-    subplot(2,1,i); 
-    plot(timevec, source_sca_mean(idx,:), '-')
-    if i ==2
-        xlabel('t / ms')
-    end
-    ylabel('dipole moment / nAm')
-    axis(axisvec)
-    grid on
-    title(name{i})
 end
-sgtitle(sprintf('%s: %s',subject, chan2plot))
-
-
-
-
-
-
-
-figure('Position', get(0, 'Screensize'))
-c = {'r','g','b'};
-sub(1) = subplot(3,2,1); 
-title('Linke Hemisphäre','FontSize',30)
-hold on
-arrayfun(@(i) plot(dipfit_timeseries{1}.time*1000,meantimecourse{1}(i,:),'-','color',c{i},'LineWidth',2),1:3)
-% p1          = plot(dipfit_timeseries{1}.time*1000,sqrt(sum(meantimecourse{1}.^2,1)),'k-','LineWidth',2);
-patch([dipfit_timeseries{1}.time*1000,fliplr(dipfit_timeseries{1}.time*1000)],[meantimecourse{1}(1,:)+stdev_dipfit2(1,:,1),fliplr(meantimecourse{1}(1,:)-stdev_dipfit2(1,:,1))],c{1},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
-patch([dipfit_timeseries{1}.time*1000,fliplr(dipfit_timeseries{1}.time*1000)],[meantimecourse{1}(2,:)+stdev_dipfit2(2,:,1),fliplr(meantimecourse{1}(2,:)-stdev_dipfit2(2,:,1))],c{2},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
-patch([dipfit_timeseries{1}.time*1000,fliplr(dipfit_timeseries{1}.time*1000)],[meantimecourse{1}(3,:)+stdev_dipfit2(3,:,1),fliplr(meantimecourse{1}(3,:)-stdev_dipfit2(3,:,1))],c{3},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
-% p1.Color(4) = 0.5;
-% xlabel('t / ms')
-ylabel('Z-Score')
-xlim([-100,400])
-ylim([mini_dip,maxi_dip])
-leg = legend({'x', 'y', 'z','|.|'},'Location','northwest');
-title(leg,'Dipolfit')
+xlabel('t / ms')
+ylabel('dipole moment / nAm'); 
+legend([{'dipolfit timewindow'},name],'Location','northeast');
+axis(axisvec) 
 grid on
 grid minor
-sub(2) = subplot(3,2,2); 
-title('Rechte Hemisphäre','FontSize',20)
-hold on
-arrayfun(@(i) plot(dipfit_timeseries{1}.time*1000,meantimecourse{2}(i,:),'-','color',c{i},'LineWidth',2),1:3)
-% p1          = plot(dipfit_timeseries{1}.time*1000,sqrt(sum(meantimecourse{2}.^2,1)),'k-','LineWidth',2);
-patch([dipfit_timeseries{1}.time*1000,fliplr(dipfit_timeseries{1}.time*1000)],[meantimecourse{2}(1,:)+stdev_dipfit2(1,:,2),fliplr(meantimecourse{2}(1,:)-stdev_dipfit2(1,:,2))],c{1},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
-patch([dipfit_timeseries{1}.time*1000,fliplr(dipfit_timeseries{1}.time*1000)],[meantimecourse{2}(2,:)+stdev_dipfit2(2,:,2),fliplr(meantimecourse{2}(2,:)-stdev_dipfit2(2,:,2))],c{2},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
-patch([dipfit_timeseries{1}.time*1000,fliplr(dipfit_timeseries{1}.time*1000)],[meantimecourse{2}(3,:)+stdev_dipfit2(3,:,2),fliplr(meantimecourse{2}(3,:)-stdev_dipfit2(3,:,2))],c{3},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
-% p1.Color(4) = 0.5;
-% xlabel('t / ms')
-% ylabel('mom / a.u.')
-xlim([-100,400])
-ylim([mini_dip,maxi_dip])
-leg = legend({'x', 'y', 'z','|.|'},'Location','northwest');
-title(leg,'Dipolfit')
-grid on
-grid minor
-
-
-
-
-
+sgtitle(sprintf('%s',chan2plot))
 
 %% Additional functions
 %------------------------------------------------------------------------

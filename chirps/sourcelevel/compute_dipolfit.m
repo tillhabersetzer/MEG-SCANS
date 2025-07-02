@@ -52,7 +52,7 @@ cd(current_dir)
 % For test purposes of eeg reference, only select single session and
 % condition
 
-subjects = 2:24; % all files available for sub-02-sub-23
+subjects = 22:24; % all files available for sub-02-sub-23
 % subjects = 4;
 n_subj   = length(subjects);
 

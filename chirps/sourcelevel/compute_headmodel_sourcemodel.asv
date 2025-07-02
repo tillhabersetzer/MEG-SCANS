@@ -166,7 +166,10 @@ for sub_idx = 1:n_subj
     % cfg.headshape.icp         = 'no'; 
     % mri_coreg                 = ft_volumerealign(cfg, mri_coreg);
 
-    if strcmp(subject,'sub-09') % necessary for segmentation, volumebiascorrect doesn't work
+    % 2. Reslice
+    %-----------
+    if strcmp(subject,'sub-09') || strcmp(subject,'sub-20')
+        % Segmentation seems to fail for resliced mri with [256 256 256]
         cfg            = [];
         % cfg.resolution = 1; % in mm 
         cfg.dim        = [320 320 320];
@@ -181,20 +184,12 @@ for sub_idx = 1:n_subj
         mri_resliced   = ft_volumereslice(cfg,mri_coreg); 
     end
 
-    % 2. Reslice
-    %-----------
-    if strcmp(subject,'sub-20')
-        cfg_bias        = [];
-        cfg_bias.method = 'spm'; % Use SPM's bias correction
-        mri_resliced    = ft_volumebiascorrect(cfg_bias, mri_resliced);
-    end   
-
     % Check 
     %------
-    % cfg = [];
-    % ft_sourceplot(cfg, mri_coreg);
-    % cfg = [];
-    % ft_sourceplot(cfg, mri_resliced);
+    cfg = [];
+    ft_sourceplot(cfg, mri_coreg);
+    cfg = [];
+    ft_sourceplot(cfg, mri_resliced);
 
     % 3. Segmentation (most time consuming)
     %--------------------------------------
@@ -206,11 +201,23 @@ for sub_idx = 1:n_subj
     % Copy the Anatomy into the segmented Mri
     mri_segmented.anatomy = mri_resliced.anatomy;
 
+    cfg_bias            = [];
+    cfg_bias.method     = 'spm'; % Use SPM's bias correction
+    mri_resliced_corr   = ft_volumebiascorrect(cfg_bias, mri_resliced);
+
+    cfg           = [];
+    cfg.output    = {'brain','skull','scalp'}; % you only need brain for meg
+    mri_segmented_new = ft_volumesegment(cfg, mri_resliced_corr);
+    
+    % Copy the Anatomy into the segmented Mri
+    mri_segmented_new.anatomy = mri_resliced_corr.anatomy;
+
+   
     % Check
     %------
-    % cfg              = [];
-    % cfg.funparameter = 'brain';
-    % ft_sourceplot(cfg, mri_segmented);
+    cfg              = [];
+    cfg.funparameter = 'brain';
+    ft_sourceplot(cfg, mri_segmented);
 
     % 4. Headmodel
     %-------------
