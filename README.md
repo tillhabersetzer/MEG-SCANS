@@ -54,5 +54,6 @@ This section describes the cross-correlation analysis performed for the technica
 other functions
 * maxfilter
 * freesurfer, check trigger not shared
+* + maybe onclude picture of coregistration report
 
 
