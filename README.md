@@ -50,3 +50,9 @@ This section describes the cross-correlation analysis performed for the technica
 | `audio_envelope.m` | This script calculates the speech envelope for various audiobook stimuli, primarily as a check. (Note: The envelopes used for the cross-correlation analysis are actually computed in `preprocessing_crosscorr.m`.) It generates an interactive figure displaying the raw audio waveform and its calculated envelope in three synchronized plots. A slider control allows users to scroll through the audio over time for easy signal inspection and comparison. |
 
 ## helper functions
+
+other functions
+* maxfilter
+* freesurfer, check trigger not shared
+
+
