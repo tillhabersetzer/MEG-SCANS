@@ -72,6 +72,12 @@ The `audio_envelopes.m` script in the `speech` directory provides a tool for det
 | :--- | :--- | 
 | `audio_envelopes.m` | This script is an interactive tool for visualizing speech envelopes. It processes a selected audiobook file to compute a specific type of envelope (e.g., auditory, onset) and then generates a multi-panel plot with a slider that allows for easy scrolling and comparison of the raw audio waveform and its derived envelope. |
 
+An example of the coregistration report is shown below. This report is created for each subject to allow for visual inspection of the alignment between the sensor and anatomical data.
+![Coregistration example](./images/coregistration_report_example.png)
+
+
+
+
 
 other functions
 * maxfilter
