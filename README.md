@@ -54,7 +54,7 @@ This section describes the cross-correlation analysis performed for the technica
 ## Decoding analysis
 This section describes the decoding-based analysis used for the technical validation of the speech material, for both audiobook and olsa recording. The analysis aimed to reproduce the results of Vanthornhout et al. (2018) [[doi:10.1007/s10162-018-0654-z]](https://doi.org/10.1007/s10162-018-0654-z) by training a backward model (decoder) on continuous audiobook data and testing its ability to reconstruct the speech envelopes of unseen OLSA sentences.
 The primary objective was to reconstruct the psychometric function of speech intelligibility using an objective, neural-based metric. The temporal response function (TRF) framework used for training and evaluating the decoder is described in detail by Crosse et al. (2021) [[doi:10.3389/fnins.2021.705621]](https://doi.org/10.3389/fnins.2021.705621) and O'Sullivan et al. (2014) [[doi:10.1093/cercor/bht355]](https://doi.org/10.1093/cercor/bht355).
-The decoding analysis pipeline closely follows the structure of the cross-correlation pipeline.
+The decoding analysis pipeline closely follows the structure of the cross-correlation pipeline. The analysis workflow is divided into the following scripts:
 
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
@@ -67,6 +67,11 @@ The decoding analysis pipeline closely follows the structure of the cross-correl
 | `plot_decoding.m` | This script is responsible for creating Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ## helper functions
+The audio_envelopes.m script in the 'speech' directory provides a tool for detailed visualization of the envelopes used in both the cross-correlation and decoding analyses.
+| Script Name | Description |                                                                                                                                                                                               
+| :--- | :--- | 
+| `audio_envelopes.m` | This script is an interactive tool for visualizing speech envelopes. It processes a selected audiobook file to compute a specific type of envelope (e.g., auditory, onset) and then generates a multi-panel plot with a slider that allows for easy scrolling and comparison of the raw audio waveform and its derived envelope. |
+
 
 other functions
 * maxfilter
