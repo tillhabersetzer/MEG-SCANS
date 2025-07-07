@@ -5,13 +5,13 @@ clear settings
 
 % Define paths
 %-------------
-settings.path2project     = fullfile('/mnt','localSSDPOOL','fiko7761','masterthesis');
-% settings.path2project     = fullfile('M:\masterthesis');
+% settings.path2project     = fullfile('/mnt','localSSDPOOL','fiko7761','masterthesis');
+settings.path2project     = fullfile('M:\masterthesis');
 settings.path2derivatives = fullfile(settings.path2project,'derivatives');
 settings.path2bids        = fullfile(settings.path2project,'bids_conversion','bids_data');
 
-% settings.path2fieldtrip   = fullfile('M:','toolboxes','fieldtrip-20250523');
-settings.path2fieldtrip   = fullfile('/mnt','localSSDPOOL','fiko7761','toolboxes','fieldtrip-20250523');
+% settings.path2fieldtrip   = fullfile('/mnt','localSSDPOOL','fiko7761','toolboxes','fieldtrip-20250523');
+settings.path2fieldtrip   = fullfile('M:','toolboxes','fieldtrip-20250523');
 
 % Other settings
 %---------------

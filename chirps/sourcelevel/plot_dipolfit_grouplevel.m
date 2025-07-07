@@ -195,10 +195,9 @@ ft_plot_slice(template_mri.anatomy, 'transform', template_mri.transform, 'locati
 ft_plot_crosshair(pos, 'color', [1 1 1]/2);
 axis tight
 axis off
-view(12, -10)
 % view(0, 90) % axial
 % view(0, 0) % coronal
-% view(-90, 0) % sagittal
+view(90, 0) % sagittal
 
 cfg         = [];
 cfg.atlas   = atlas;
@@ -219,15 +218,20 @@ fprintf('Mean dipole position right: %s\n',label_right{1})
 %% (3.1) All moments, xyz-directions and both hemispheres
 %--------------------------------------------------------------------------
 
+title_font_size  = 24; % Font size for subplot titles
+label_font_size  = 24; % Font size for x and y axis labels
+axis_font_size   = 24; % title_font_size  
+legend_font_size = 20;
+
 minval = min(avg_dipole_timecourse_vec-avg_dipole_timecourse_vec_sem,[],'all');
 maxval = max(avg_dipole_timecourse_vec+avg_dipole_timecourse_vec_sem,[],'all');
 
-name    = {'left hemisphere','right hemisphere'};
+name    = {'Left Hemisphere','Right Hemisphere'};
 timevec = sources_vec{1}.time*1000;  
 cmap    = {"r","g","b"}; %'x' 'y' 'z'
 % Loop over both hemispheres
 figure('Name','Freely oriented dipole (fixed positions, loose orientation','Color','w')
-axisvec   = horzcat(time2plot,[minval,maxval]);
+axisvec = horzcat(time2plot,[minval,maxval]);
 
 for lr_idx = 1:2
     idxs2plot = (lr_idx-1)*3+(1:3); % 1:3 or 4:6
@@ -249,14 +253,21 @@ for lr_idx = 1:2
         xlabel('t / ms')
     end
     ylabel('dipole moment / nAm'); 
-    legend(sp(1),{'dipolfit timewindow','x', 'y', 'z'},'Location','southwest');
+    legend(sp(1),{'timewindow dipolfit','x', 'y', 'z'},'Location','southwest', 'FontSize', legend_font_size);
     axis(axisvec) 
-    grid on
-    grid minor
-    title(name{lr_idx})
+    grid on;
+    grid minor;
+    box on; 
+    title(name{lr_idx}, 'FontSize', title_font_size)
+
+    xticks(time2plot(1):100:time2plot(2)); % Set x-axis ticks in steps of 100 ms
+    set(gca, 'FontSize', axis_font_size); % Set font size for axis values
     
 end
-sgtitle(sprintf('%s',chan2plot))
+sgtitle(sprintf('%s',chan2plot),'FontSize', title_font_size+4)
+
+% Link Y-axes of top plots for consistent scaling
+linkaxes(sp, 'y');
 
 
 %% (3.2) Fixed dipole, mean dipolmoment orientation as orientation constraint

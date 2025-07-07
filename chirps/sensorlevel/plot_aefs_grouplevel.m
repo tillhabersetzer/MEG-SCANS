@@ -259,7 +259,8 @@ error_color        = [0.8, 0.8, 0.8]; % Shaded error area color
 error_alpha        = 0.8; % Shaded error area transparency
 
 title_font_size    = 18; % Font size for subplot titles
-label_font_size    = 16; % Font size for x and y axis labels
+label_font_size    = 18; % Font size for x and y axis labels
+axis_font_size     = 18; % title_font_size  
 legend_font_size   = 10;
 legend_num_columns = 7;
 
@@ -293,11 +294,16 @@ for i = 1:2
         
     % Apply common formatting
     xlabel('t / ms', 'FontSize', label_font_size);
-    ylabel(sprintf('sig / %s',b_unit), 'FontSize', label_font_size)
+    ylabel(sprintf('AEF / %s',b_unit), 'FontSize', label_font_size)
     ylim(ylims);
     xlim(xlims);
+
+    xticks(xlims(1):100:xlims(2)); % Set x-axis ticks in steps of 100 ms
+    set(gca, 'FontSize', axis_font_size); % Set font size for axis values
+
     grid on;
     grid minor;
+    box on; 
 end
 title(ax_top1,sprintf('Left Hemisphere: %s', chan2plot{1}), 'FontSize', title_font_size);
 title(ax_top2,sprintf('Right Hemisphere: %s', chan2plot{2}), 'FontSize', title_font_size);
@@ -317,7 +323,7 @@ axes(ax_bottom);
 hold on;
 
 % Define line styles for the two channels
-ga_linestyles = {'-', '--'};
+ga_linestyles = {'--', '-'};
 ga_legends    = cell(1, 2);
 
 % Plot grand averages with shaded error for both channels
@@ -335,14 +341,19 @@ for i = 1:2
         'LineWidth', ga_line_width, ...
         'Color', ga_color, ...
         'LineStyle', ga_linestyles{i});
+
+    xticks(xlims(1):100:xlims(2)); % Set x-axis ticks in steps of 100 ms
+    set(gca, 'FontSize', axis_font_size); % Set font size for axis values
+
 end
 
 % Apply formatting
 xlabel('t / ms', 'FontSize', label_font_size);
-ylabel(sprintf('sig / %s',b_unit), 'FontSize', label_font_size)
+ylabel(sprintf('AEF / %s',b_unit), 'FontSize', label_font_size)
 xlim(xlims);
 grid on;
 grid minor;
+box on; 
 legend(chan2plot, 'Location', 'northwest');
 hold off;
 
@@ -352,7 +363,7 @@ timewin2plot = zeros(1,2);
 timewin(1)   = 0.105;
 timewin(2)   = 0.180;
 
-figure('Color', 'w');
+figure('Color', 'w','Name',sprintf('%s: %i ms',sens2plot,timewin(1)*1000));
 cfg                  = [];
 cfg.xlim             =  [timewin(1),timewin(1)];
 cfg.highlight        = 'on';
@@ -364,13 +375,13 @@ cfg.layout           = layout;
 cfg.interactive      = 'no';
 cfg.comment          = 'no';
 ft_topoplotER(cfg,gavg2plot);
-title(sprintf('%s: %i ms',sens2plot,timewin(1)*1000))
+% title(sprintf('%s: %i ms',sens2plot,timewin(1)*1000))
 set(gca,'fontsize', 12)
 colormap(bluewhitered)
 
 cfg.xlim             =  [timewin(2),timewin(2)];
-figure('Color', 'w');
+figure('Color', 'w', 'Name',sprintf('%s: %i ms',sens2plot,timewin(2)*1000));
 ft_topoplotER(cfg,gavg2plot);
-title(sprintf('%s: %i ms',sens2plot,timewin(2)*1000))
+% title(sprintf('%s: %i ms',sens2plot,timewin(2)*1000))
 set(gca,'fontsize', 12)
 colormap(bluewhitered)

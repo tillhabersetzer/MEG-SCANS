@@ -27,13 +27,13 @@ cd(current_dir)
 %% Script settings
 %--------------------------------------------------------------------------
 % Choose subject for plotting
-subject = 'sub-21'; % 'sub-02'
+subject = 'sub-21'; % 
 
 %% Load data
 %--------------------------------------------------------------------------
-data       = importdata(fullfile(settings.path2project,'derivatives',subject,'chirp',[subject,'_avgs.mat']));   
-avg_grad   = data.avg_grad;
-avg_mag    = data.avg_mag;
+data     = importdata(fullfile(settings.path2project,'derivatives',subject,'chirp',[subject,'_avgs.mat']));   
+avg_grad = data.avg_grad;
+avg_mag  = data.avg_mag;
 
 %% Add combined planar gradiometers
 %--------------------------------------------------------------------------

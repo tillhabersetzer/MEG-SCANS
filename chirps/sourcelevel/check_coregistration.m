@@ -38,7 +38,7 @@ subject = sprintf('sub-%02d', sub_idx);
 % Maxfilter
 use_maxfilter = settings.use_maxfilter;
 % Use task that has been used as a reference head position
-task_ref_head = setiings.task_ref_head;
+task_ref_head = settings.task_ref_head;
 parts         = split(task_ref_head,"_");
 task          = parts(1);
 run           = parts(2);

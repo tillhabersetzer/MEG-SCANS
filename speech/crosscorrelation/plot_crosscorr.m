@@ -1,31 +1,31 @@
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 % Till Habersetzer, 01.07.2025
 % Communication Acoustics, CvO University Oldenburg
 % till.habersetzer@uol.de 
 % 
-% This script analyzes and visualizes magnetoencephalography (MEG) 
-% cross-correlation data. It compares results from a primary ('sorted')
-% condition against a null ('shuffled') condition.
+% Description:
+%   Analyzes and visualizes MEG cross-correlation results, focusing on the
+%   statistical comparison between an actual condition and a shuffled null
+%   condition.
 %
-% Key Functions:
-% 1.  Loads pre-computed subject-level and grand-average cross-correlation
-%     data for both conditions.
-% 2.  Performs a cluster-based permutation t-test using the FieldTrip 
-%     toolbox to find significant differences between conditions.
-% 3.  Generates visualizations, including:
-%     - Topographical plots of grand-average data.
-%     - Topographical maps of statistical results (t-values, clusters).
-%     - Time-series plots of selected channels showing grand-average
-%       and individual subject data.
-% 4.  Includes a helper function to create a statistical mask for plotting.
-%-----------------------------------------------------------------------
+%   Key Steps:
+%   -   Loads pre-computed, subject-level and grand-average cross-correlation
+%       data for both conditions.
+%   -   Performs a cluster-based permutation t-test to identify significant
+%       time-channel clusters where the conditions differ.
+%   -   Generates a suite of visualizations, including:
+%       - Topographical plots of grand-average waveforms.
+%       - Topographical maps of statistical results (t-values, clusters).
+%       - Time-series plots of selected channels showing individual and
+%         grand-average data.
+%--------------------------------------------------------------------------
 
 close all
 clearvars
 clc 
 
 %% Import main settings 
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 current_dir = pwd;
 cd(fullfile('..'))
 settings_speech
@@ -35,19 +35,21 @@ cd(current_dir)
 addpath(fullfile(settings.path2project,'analysis','helper_functions'))
 
 %% Script settings
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 % Choose subject for plotting
 subjects = 1:24;
 n_subj   = length(subjects);
 
 %% Import data
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 avgs_crosscorr          = cell(1,n_subj);
 avgs_crosscorr_shuffled = cell(1,n_subj);
 n_trials                = zeros(1,n_subj);
+subjectnames            = cell(1,n_subj);
 
 for sub_idx = 1:n_subj
-    subject = sprintf('sub-%02d',subjects(sub_idx));
+    subject               = sprintf('sub-%02d',subjects(sub_idx));
+    subjectnames{sub_idx} = subject;
 
     data                             = importdata(fullfile(settings.path2derivatives,subject,'speech',sprintf('%s_crosscorr.mat',subject)));   
     avgs_crosscorr{sub_idx}          = data.avg_crosscorr;
@@ -77,6 +79,20 @@ cfg.operation            = 'subtract';
 cfg.parameter            = 'avg';
 gavg_crosscorr_raweffect = ft_math(cfg,gavg_crosscorr,gavg_crosscorr_shuffled);
 
+%% Plot kept trials
+%--------------------------------------------------------------------------
+
+figure; 
+b1 = bar(1:n_subj, n_trials, 'FaceColor', [0.8 0.8 0.8]); % Light grey
+ax                    = gca; 
+ax.XTick              = 1:n_subj; 
+ax.XTickLabel         = subjectnames;
+ax.XTickLabelRotation = 45; 
+title(sprintf('Number of trials (Trialduration: %is)',settings.crosscorr.trialdur));
+ylabel('Number of Trials');
+xlabel('Subject');
+grid on; 
+
 %% Plot crosscorrelations for all sensors arranged topographically 
 %--------------------------------------------------------------------------
 figure
@@ -102,7 +118,7 @@ ft_multiplotER(cfg, gavg_crosscorr,gavg_crosscorr_shuffled,gavg_crosscorr_raweff
 title('gavg: gradiometer')
 
 %% Calculate cluster-based permutation statistic and show clusters
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 % choose sensors
 %---------------
@@ -154,7 +170,7 @@ cfg.uvar   = 2; % row of design matrix that contains unit of observation
 stat = ft_timelockstatistics(cfg,avgs_crosscorr{:},avgs_crosscorr_shuffled{:});
 
 % Show clusters
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 cluster_number = 1;
 pos            = any(ismember(stat.posclusterslabelmat,cluster_number),2);
 neg            = any(ismember(stat.negclusterslabelmat,cluster_number),2);
@@ -177,7 +193,7 @@ ft_topoplotER(cfg,stat);
 colormap(bluewhitered)
 
 %% Visualize Statistic
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 % Set alpha-value for mask
 %-------------------------
@@ -249,7 +265,7 @@ ft_multiplotER(cfg,stat);
 sgtitle(sprintf('%s: t-values',sensortype),'fontweight','bold','FontSize',20)
 
 %% Visualize cross correlation timeseries of both conditions
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 % Compute standard error of mean 
 gavg_crosscorr_sem          = sqrt(gavg_crosscorr.var) ./ sqrt(gavg_crosscorr.dof);
@@ -257,17 +273,21 @@ gavg_crosscorr_shuffled_sem = sqrt(gavg_crosscorr_shuffled.var) ./ sqrt(gavg_cro
 
 % Plot selected channels for grand average (order not important) with 
 % standard error of mean (sem) and individual time courses (optional)
-%--------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 % channels to plot
-chan2plot     = {'MEG0341','MEG0231','MEG1611','MEG1221','MEG1341','MEG2421'};
-n_chan        = length(chan2plot);
-error_alpha   = 0.2; % Shaded error area transparency
-timevec       = gavg_crosscorr.time*1000;
-subject_alpha = 0.6;
-subject_color = [0.8, 0.8, 0.8]; 
+chan2plot              = {'MEG0341','MEG0231','MEG1611','MEG1221','MEG1341','MEG2421'};
+n_chan                 = length(chan2plot);
+error_alpha            = 0.2; % Shaded error area transparency
+timevec                = gavg_crosscorr.time*1000;
+subject_alpha          = 0.6;
+subject_color          = [0.8, 0.8, 0.8]; 
 subject_color_shuffled = [0.5, 0.5, 0.5]; 
+axis_font_size         = 18; 
+legend_font_size       = 16;
+title_font_size        = 18; 
 
+xlims  = [-100,900];
 idx    = find(contains(gavg_crosscorr.label,chan2plot));
 minval = min(gavg_crosscorr.avg(idx,:)-gavg_crosscorr_sem(idx,:),[],'all');
 maxval = max(gavg_crosscorr.avg(idx,:)+gavg_crosscorr_sem(idx,:),[],'all');
@@ -300,20 +320,24 @@ for ch_idx = 1:n_chan
 
     xlabel('t / ms')
     ylabel('$\hat{R}$','Interpreter','Latex')
-    title(chan_name)
-    grid on
-    grid minor
+    title(chan_name, 'FontSize', title_font_size)
+
+    xticks(xlims(1):200:xlims(2)); % Set x-axis ticks in steps of 100 ms
+    set(gca, 'FontSize', axis_font_size); % Set font size for axis values
+    
+    grid on;
+    grid minor;
+    box on; 
 
     % Add legend only for the first subplot
     % if ch_idx == 1
-        legend([plt1, plt2],{'shuffled','sorted'},'Interpreter', 'none','Location','Southeast')
+        legend([plt1, plt2],{'shuffled','sorted'},'Interpreter', 'none','Location','Southeast','FontSize',legend_font_size)
     % end
 end
 % Link the X-axes of all subplots
 linkaxes(axis_handles, 'xy');
 % Setting it on one linked axis will propagate to all others
 ylims  = [minval, maxval]; % Centralized Y-axis limits
-xlims  = [-100,900];
 set(axis_handles, 'XLim', xlims, 'YLim', ylims);
 
 % Highlight channels in topoplot
@@ -349,9 +373,10 @@ ft_multiplotER(cfg,gavg_crosscorr_shuffled,gavg_crosscorr);
 
 
 %% Functions
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
+
 function mask = give_stat_mask(stat,alpha)
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 % Till Habersetzer, 01.07.2025
 % Communication Acoustics, CvO University Oldenburg
 % till.habersetzer@uol.de 
@@ -378,7 +403,7 @@ function mask = give_stat_mask(stat,alpha)
 % figure;
 % imagesc(mask);
 % colormap(gray); % or any suitable colormap for binary masks
-%-----------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 % positive clusters
 %------------------
