@@ -15,7 +15,7 @@ The technical validation covers the following aspects:
 
 * Computation of auditory evoked fields (AEFs) based on chirp stimuli and a dipole fit of their N100m component.
 * Computation of cross-correlation functions between presented audiobooks and MEG recordings, including a null distribution of permuted audio.
-* Training of a decoder based on the audiobooks to infer speech intelligibility encoded in the MEG recordings (see: https://doi.org/10.1007/s10162-018-0654-z).
+* Training of a decoder based on the audiobooks to infer speech intelligibility encoded in the MEG recordings.
 
 MATLAB R2023a and the FieldTrip toolbox (https://www.fieldtriptoolbox.org/) were used for the analysis.
 
@@ -40,7 +40,7 @@ The analysis of Auditory Evoked Fields (AEFs) is distinguished into sensor-level
 | `compute_dipolefit.m` | Performs dipole model fitting on individual subjects' MEG data to estimate the location and time course of neural sources. It uses a multi-step process, starting with a symmetric grid search to get an initial location, followed by a non-linear refinement to find the precise dipole positions. The dipole fit is performed separately on magnetometers and gradiometers. |                                                 | `plot_dipolefit_subjectlevel.m` | Visualizes and validates a single subject's dipole fitting results. It plots the final dipole locations on the subject's MRI and identifies their corresponding anatomical labels using an atlas. The script also plots the reconstructed source time courses. |                                                                                                                                                          | `plot_dipolefit_grouplevel.m` | This script generates Figure XX in the publication ([DOI to data descriptor paper]). It analyzes group dipole fitting results by first performing automated quality control to exclude subjects with poor fits. From the remaining valid data, it calculates the group-average dipole locations and source time courses. It then visualizes these results, creating a 3D plot of all individual and mean dipole locations on a template brain, and plots of the grand-average source activity over time with standard error. |
 
 ## Cross-correlation analysis
-This section describes the cross-correlation analysis performed for the technical validation of the speech material. This analysis examines the relationship between audiobook onset envelopes and magnetoencephalography (MEG) recordings, drawing inspiration from Petersen et al. (2016) [https://doi.org/10.1152/jn.00527.2016]. The specific settings for this cross-correlation analysis are configured in `settings_speech.m`. The analysis workflow is divided into the following scripts:
+This section describes the cross-correlation analysis performed for the technical validation of the speech material. This analysis examines the relationship between audiobook onset envelopes and magnetoencephalography (MEG) recordings, drawing inspiration from Petersen et al. (2016) [doi:10.1152/jn.00527.2016]. The specific settings for this cross-correlation analysis are configured in `settings_speech.m`. The analysis workflow is divided into the following scripts:
 
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
@@ -50,6 +50,15 @@ This section describes the cross-correlation analysis performed for the technica
 | `computation_crosscorr.m` | This script performs a subject-level temporal cross-correlation analysis between MEG data and an audio envelope. For a given subject, it loads preprocessed data and calculates the trial-by-trial correlation for two conditions: one with the correctly aligned audio and a second, shuffled-trial control condition for statistical comparison. It then saves the trial-averaged results for both conditions. |
 | `computation_gavg_crosscorr.m` | This script computes a group-level grand average from individual subject data. It loads the pre-computed, trial-averaged cross-correlation results for each subject, then uses FieldTrip to calculate the grand average for both the actual and the shuffled control conditions, saving the final result to a single file. |
 | `plot_crosscorr.m` | This script visualizes and statistically analyzes pre-computed MEG cross-correlation data. It loads group-level results and performs a cluster-based permutation test to find significant differences between the actual data and a shuffled-trial null condition. It then generates a comprehensive set of plots, including topographical maps of the results and detailed time-series plots for selected channels. This script is responsible for creating Figure XX in the publication ([DOI to data descriptor paper]). |
+
+## Decoding analysis
+This section describes the decoding-based analysis used for the technical validation of the speech material, for both audiobook and olsa recording. The analysis aimed to reproduce the results of Vanthornhout et al. (2018) [doi:10.1007/s10162-018-0654-z] by training a backward model (decoder) on continuous audiobook data and testing its ability to reconstruct the speech envelopes of unseen OLSA sentences.
+The primary objective was to reconstruct the psychometric function of speech intelligibility using an objective, neural-based metric. The temporal response function (TRF) framework used for training and evaluating the decoder is described in detail by Crosse et al. (2021) [doi:10.3389/fnins.2021.705621] and O'Sullivan et al. (2014) [doi:10.1093/cercor/bht355].
+
+
+
+
+
 
 ## helper functions
 
