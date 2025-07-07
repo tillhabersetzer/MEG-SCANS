@@ -54,11 +54,17 @@ This section describes the cross-correlation analysis performed for the technica
 ## Decoding analysis
 This section describes the decoding-based analysis used for the technical validation of the speech material, for both audiobook and olsa recording. The analysis aimed to reproduce the results of Vanthornhout et al. (2018) [[doi:10.1007/s10162-018-0654-z]](https://doi.org/10.1007/s10162-018-0654-z) by training a backward model (decoder) on continuous audiobook data and testing its ability to reconstruct the speech envelopes of unseen OLSA sentences.
 The primary objective was to reconstruct the psychometric function of speech intelligibility using an objective, neural-based metric. The temporal response function (TRF) framework used for training and evaluating the decoder is described in detail by Crosse et al. (2021) [[doi:10.3389/fnins.2021.705621]](https://doi.org/10.3389/fnins.2021.705621) and O'Sullivan et al. (2014) [[doi:10.1093/cercor/bht355]](https://doi.org/10.1093/cercor/bht355).
+The decoding analysis pipeline closely follows the structure of the cross-correlation pipeline.
 
-
-
-
-
+| Script Name | Description |                                                                                                                                                                                               
+| :--- | :--- | 
+| `analysis_pipeline_decoding.m` | This master script orchestrates the complete neural decoding analysis pipeline. It begins by preprocessing all audio stimuli (both OLSA sentences and audiobooks). It then uses a parallel loop to process each subject, which involves preparing their corresponding MEG data and then executing the main script to train and evaluate a subject-specific decoding model. The entire workflow and total execution time are logged to a text file. |
+| `preprocessing_olsa.m` | This script prepares OLSA sentence stimuli for a neural decoding analysis. It individually processes each raw .wav file by computing its auditory envelope, applying padding, and then performing a multi-step filtering and resampling process to align with neural data parameters. All processed envelopes are saved together in a single .mat file. |
+| `preprocessing_audiobooks.m` | This script prepares audiobook stimuli for a neural decoding analysis. For each raw .wav file, it computes the auditory envelope, then applies a multi-step process of filtering, resampling, and segmenting the envelope into fixed-length epochs. The final data is saved into separate .mat files for the pilot subject and main subject group. |
+| `preprocessing_audiobooks_decoding.m` | This script prepares a single subject's audiobook data for a decoding analysis. It processes the continuous MEG recording by filtering, epoching, and downsampling it. The script then loads the corresponding pre-processed audio envelopes and rigorously synchronizes the two datasets by rejecting invalid trials and truncating all remaining pairs to a uniform length before saving the final data.  |
+| `preprocessing_olsa_decoding.m` | This script prepares OLSA sentence stimuli for a neural decoding analysis. It individually processes each raw .wav file by computing its auditory envelope, applying padding, and then performing a multi-step filtering and resampling process to align with neural data parameters. All processed envelopes are saved together in a single .mat file. |
+| `training_decoding.m` | This script trains and evaluates a subject-specific neural decoding model using the mTRF Toolbox. It first trains a Temporal Response Function (TRF) model to reconstruct speech envelopes from MEG data using a continuous audiobook dataset. It then evaluates the model's performance on a held-out portion of the audiobook data and tests its ability to generalize by using it to reconstruct speech envelopes from a separate OLSA sentence task. |
+| `plot_decoding.m` | This script is responsible for creating Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ## helper functions
 
