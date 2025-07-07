@@ -67,7 +67,7 @@ The decoding analysis pipeline closely follows the structure of the cross-correl
 | `plot_decoding.m` | This script is responsible for creating Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ## helper functions
-The audio_envelopes.m script in the 'speech' directory provides a tool for detailed visualization of the envelopes used in both the cross-correlation and decoding analyses.
+The `audio_envelopes.m` script in the `speech` directory provides a tool for detailed visualization of the envelopes used in both the cross-correlation and decoding analyses.
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
 | `audio_envelopes.m` | This script is an interactive tool for visualizing speech envelopes. It processes a selected audiobook file to compute a specific type of envelope (e.g., auditory, onset) and then generates a multi-panel plot with a slider that allows for easy scrolling and comparison of the raw audio waveform and its derived envelope. |
