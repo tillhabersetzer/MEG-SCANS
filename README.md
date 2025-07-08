@@ -101,6 +101,22 @@ The `audio_envelopes.m` script in the `speech` directory provides a tool for det
 | :--- | :--- | 
 | `audio_envelopes.m` | This script contained in the `speech` directory is an interactive tool for visualizing the speech envelopes used in the cross-correlation and decoding analyses. It processes a selected audiobook file, computes the desired envelope type (e.g., auditory, onset), and generates a multi-panel plot with a slider to easily compare the raw audio waveform against its derived envelope. |
 
+The `helper_functions` directory contains custom functions used across various analysis pipelines.
+
+### Plotting, Source Analysis, Envelope Calculation, FieldTrip Trial Functions
+
+
+| Script Name | Description |                                                                                                                                                                                               
+| :--- | :--- | 
+| `bluewhitered.m` | Generates a divergent blue-white-red colormap, ideal for topographical plots. |
+| `distinguishable_colors.m` | Creates a set of maximally distinct colors, used for plotting data from different subjects. |
+| `check_diploc.m` | Determines the hemisphere location of a fitted dipole. |
+| `constrained_dipolfitting.m` | Calculates the scalar dipole moment for a fixed-orientation two-dipole model. |
+| `cal_envelope.m` | Computes various types of speech envelopes (e.g., onset, auditory) from raw audio. |
+| `my_trialfun_audiobook.m` | A custom `trialfun` that defines epochs from the audiobook recordings based on triggers. |
+| `my_trialfun_olsa.m` | A custom `trialfun` that defines epochs from the OLSA recordings. |
+| `read_event_modified.m` | A custom function to read events from Neuromag .fif files, that can be used in `my_trialfun_audiobook.m` as an option.  |
+
 An example of the coregistration report is shown below. This report is created for each subject to allow for visual inspection of the alignment between the sensor and anatomical data.
 ![Coregistration example](./images/coregistration_report_example.png)
 
@@ -111,9 +127,7 @@ An example of the coregistration report is shown below. This report is created f
 other functions
 * maxfilter
 * freesurfer, check trigger not shared
-* + maybe onclude picture of coregistration report
 
-| `audio_envelope.m` | This script calculates the speech envelope for various audiobook stimuli, primarily as a check. (Note: The envelopes used for the cross-correlation analysis are actually computed in `preprocessing_crosscorr.m`.) It generates an interactive figure displaying the raw audio waveform and its calculated envelope in three synchronized plots. A slider control allows users to scroll through the audio over time for easy signal inspection and comparison. |
 
 
 
