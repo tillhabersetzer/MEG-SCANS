@@ -27,10 +27,27 @@ The technical validation covers the following aspects:
   
 **For BIDS conversion and Maxwell filtering**
 * [MNE-Python](https://mne.tools/stable/index.html) (version: 1.9.0)
-* [MNE-BIDS](https://mne.tools/mne-bids/stable/ind) (bersion: 0.16.0)
+* [MNE-BIDS](https://mne.tools/mne-bids/stable/ind) (version: 0.16.0)
   
 **Others**
 * [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all)
+
+### How to run the analysis pipeline
+
+**Preprocessing**
+The provided MEG data adheres to the Brain Imaging Data Structure (BIDS) standard, which ensures a clear structure and naming scheme.
+Additionally, all MEG recordings have undergone an initial preprocessing stage using MaxFilter. This initial step includes spatiotemporal signal space separation (tSSS) for noise reduction and correction for head movements. To facilitate analysis across runs, all of a participant's recordings have also been transformed to a common head position, using their first audiobook run (‘task-audiobook1_run-01‘) as the reference.
+Maxfiltered files are shared withtin the `derivatives` folder.
+
+**Setting it up**
+Each analysis pipeline is controlled by a main settings file (e.g., `settings_chirps.m` or `settings_speech.m`). Before running any analysis, you must edit this file to define the paths to the project folder and required toolboxes.
+The following key paths need to be set:
+* `settings.rootpath`: This is the base path that helps switch between different computer environments (e.g., a local machine vs. a remote server). All other paths are typically constructed relative to this.
+  * Example: `settings.rootpath = '/mnt/localSSDPOOL/projects'`
+* `settings.path2project`: The full path to this main project folder.
+  * Example: `settings.path2project = fullfile(settings.rootpath, 'meg_scans')`
+* `settings.path2toolboxes`: The full path to the directory where all required toolboxes (like FieldTrip, mTRF-Toolbox, etc.) are stored.
+  * Example: `settings.path2toolboxes = fullfile(settings.rootpath, 'toolboxes')`
 
 ## Auditory Evoked Fields (AEFs)
 
