@@ -25,11 +25,12 @@ The technical validation covers the following aspects:
 * [mTRF-Toolbox](https://github.com/mickcrosse/mTRF-Toolbox) (version: 2.7)
 * [THE AUDITORY MODELING TOOLBOX](https://amtoolbox.org/) (version: 1.6.0)
   
-**For BIDS conversion and maxfiltering**
-* Python (version?!)
+**For BIDS conversion and Maxwell filtering**
+* [MNE-Python](https://mne.tools/stable/index.html) (version: 1.9.0)
+* [MNE-BIDS](https://mne.tools/mne-bids/stable/ind) (bersion: 0.16.0)
   
 **Others**
-* freesurfer
+* [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all)
 
 ## Auditory Evoked Fields (AEFs)
 
