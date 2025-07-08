@@ -17,7 +17,12 @@ The technical validation covers the following aspects:
 * A cross-correlation analysis between audiobook envelopes and MEG data.
 * A decoding analysis where models are trained on audiobooks and tested on OLSA sentences.
 
-MATLAB R2023a and the FieldTrip toolbox (https://www.fieldtriptoolbox.org/) were used for the analysis.
+### Software used during the analysis
+* MATLAB R2023a
+* [FieldTrip toolbox](https://www.fieldtriptoolbox.org/) (version: 20250523) 
+* [mTRF-Toolbox](https://github.com/mickcrosse/mTRF-Toolbox) (version: 2.7)
+* [THE AUDITORY MODELING TOOLBOX](https://amtoolbox.org/) (version: 1.6.0)
+* Python (version?!)
 
 ## Auditory Evoked Fields (AEFs)
 
