@@ -51,7 +51,7 @@ The following key paths need to be set:
 
 ## Auditory Evoked Fields (AEFs)
 
-The AEF analysis is divided into sensor-level and source-level analyses, with settings configured in `settings_chirps.m`. More detailed descriptions of each script's functionality can be found within the scripts themselves.
+The AEF analysis is divided into sensor-level and source-level analyses, with settings configured in `settings_chirps.m`. More detailed descriptions of each script's functionality can be found within the scripts themselves. This pipeline does not include a master script. The following scripts must be run manually in the order they are presented below.
 
 ### Sensor Level Analysis 
 
