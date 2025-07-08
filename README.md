@@ -32,14 +32,14 @@ The technical validation covers the following aspects:
 **Others**
 * [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all)
 
-### How to run the analysis pipeline
+### Running the Pipeline
 
-**Preprocessing**
+**Preprocessing**:
 The provided MEG data adheres to the Brain Imaging Data Structure (BIDS) standard, which ensures a clear structure and naming scheme.
 Additionally, all MEG recordings have undergone an initial preprocessing stage using MaxFilter. This initial step includes spatiotemporal signal space separation (tSSS) for noise reduction and correction for head movements. To facilitate analysis across runs, all of a participant's recordings have also been transformed to a common head position, using their first audiobook run (‘task-audiobook1_run-01‘) as the reference.
 Maxfiltered files are shared withtin the `derivatives` folder.
 
-**Setting it up**
+**Getting Started**:
 Each analysis pipeline is controlled by a main settings file (e.g., `settings_chirps.m` or `settings_speech.m`). Before running any analysis, you must edit this file to define the paths to the project folder and required toolboxes.
 The following key paths need to be set:
 * `settings.rootpath`: This is the base path that helps switch between different computer environments (e.g., a local machine vs. a remote server). All other paths are typically constructed relative to this.
