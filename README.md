@@ -1,6 +1,6 @@
 # MEG-SCANS: Code for Technical Validation
 
-This repository contains the code used for the technical validation and generation of plots for the MEG-SCANS (Stories, Chirps, AND Noisy Sentences) dataset publication.
+This repository contains the code used for the technical validation and generation of plots for the MEG-SCANS (Stories, Chirps, And Noisy Sentences) dataset publication.
 
 ## Dataset and Publication
 
@@ -13,31 +13,31 @@ The MEG-SCANS (Stories, Chirps, And Noisy Sentences) dataset provides raw magnet
 
 The technical validation covers the following aspects:
 
-* Computation of auditory evoked fields (AEFs) based on chirp stimuli and a dipole fit of their N100m component.
-* Computation of cross-correlation functions between presented audiobooks and MEG recordings, including a null distribution of permuted audio.
-* Training of a decoder based on the audiobooks to infer speech intelligibility encoded in the MEG recordings.
+* Computation of Auditory Evoked Fields (AEFs) from chirp stimuli and a dipole fit of their N100m component.
+* A cross-correlation analysis between audiobook envelopes and MEG data.
+* A decoding analysis where models are trained on audiobooks and tested on OLSA sentences.
 
 MATLAB R2023a and the FieldTrip toolbox (https://www.fieldtriptoolbox.org/) were used for the analysis.
 
 ## Auditory Evoked Fields (AEFs)
 
-The analysis of Auditory Evoked Fields (AEFs) is distinguished into sensor-level and source-level analyses. Settings for the AEF analysis are stored in `settings_chirps.m`. More detailed descriptions of each script's functionality can be found within the scripts themselves.
+The AEF analysis is divided into sensor-level and source-level analyses, with settings configured in `settings_chirps.m`. More detailed descriptions of each script's functionality can be found within the scripts themselves.
 
 ### Sensor Level Analysis 
 
 | Script Name | Description |                                                                                                                                                                                             
 | :--- | :--- |
-| `compute_aefs.m` | Computes auditory evoked fields for each subject and the grand average across all subjects. It processes a list of subjects by defining trials around auditory chirp stimuli, applying a full preprocessing pipeline with artifact rejection and filtering, and then calculating an average evoked response for each individual. After processing all subjects, the script computes and saves a final grand average. |
-| `plot_aefs_subjectlevel.m` | Loads a single subject's pre-computed Auditory Evoked Field (AEF) to generate a comprehensive set of visualizations. It produces multi-channel sensor layouts, single-channel waveforms, and 2D topographic maps. Each plot type is created for magnetometers, planar gradiometers, and a combined planar gradiometer representation. |
-| `plot_aefs_grouplevel.m` | Aggregates pre-computed Auditory Evoked Field (AEF) data from all subjects to generate final summary figures. It produces overview plots of the grand average, including multi-channel layouts and topographies. This script generates Figure XX in the publication ([DOI to data descriptor paper]). For selected channels, it creates detailed visualizations that overlay every subject's response on the grand average and also plot the grand average with its standard error to illustrate variability. |
+| `compute_aefs.m` | Processes chirp stimuli to compute subject-level AEFs. It then calculates and saves the grand average across all subjects. |
+| `plot_aefs_subjectlevel.m` | Generates a comprehensive set of visualizations for a single subject's AEF data, including sensor layouts, single-channel visualizations, and topographies. |
+| `plot_aefs_grouplevel.m` | Creates summary figures for the group-level AEF analysis. It plots the grand-average and overlays individual subject data for comparison. It generates Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ### Source Level Analysis
 
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- |
-| `compute_headmodel_sourcemodel.m` | Automates the creation and validation of head and source models from anatomical MRIs for a batch of subjects for use in MEG source analysis. For each individual, the script sequentially co-registers the MRI with the MEG sensors, segments the brain volume, and computes subject-specific head and source models. The co-registration information is already provided by the BIDS dataset. For quality control, it generates a visualization of the alignment for each subject and then compiles all plots into a single HTML report for efficient visual inspection. An excerpt from this report is shown below. |
-| `check_coregistration.m` | Loads the subject's pre-computed files—including the head model, source model, segmented MRI, and sensor information—and generates a series of plots to verify their alignment. |
-| `compute_dipolefit.m` | Performs dipole model fitting on individual subjects' MEG data to estimate the location and time course of neural sources. It uses a multi-step process, starting with a symmetric grid search to get an initial location, followed by a non-linear refinement to find the precise dipole positions. The dipole fit is performed separately on magnetometers and gradiometers. |                                                 | `plot_dipolefit_subjectlevel.m` | Visualizes and validates a single subject's dipole fitting results. It plots the final dipole locations on the subject's MRI and identifies their corresponding anatomical labels using an atlas. The script also plots the reconstructed source time courses. |                                                                                                                                                          | `plot_dipolefit_grouplevel.m` | This script generates Figure XX in the publication ([DOI to data descriptor paper]). It analyzes group dipole fitting results by first performing automated quality control to exclude subjects with poor fits. From the remaining valid data, it calculates the group-average dipole locations and source time courses. It then visualizes these results, creating a 3D plot of all individual and mean dipole locations on a template brain, and plots of the grand-average source activity over time with standard error. |
+| `compute_headmodel_sourcemodel.m` | Creates subject-specific head and source models from anatomical MRIs. It also generates an HTML report for quality control. An excerpt from this report is shown below. The co-registration information is already provided by the BIDS dataset. |
+| `check_coregistration.m` | Loads pre-computed model files to generate plots that verify the coregistration alignment between sensors, head model, source model and mri. |
+| `compute_dipolefit.m` | Performs dipole model fitting using a two dipole model on a subject's AEF data (N100m peak) to estimate the location of the underlying neural sources. |                                             | `plot_dipolefit_subjectlevel.m` | Visualizes a single subject's dipole fit results, including dipole locations on the MRI and the reconstructed source time courses. |                                                       | `plot_dipolefit_grouplevel.m` | Analyzes group dipole data by excluding poor fits and computing the group-average location and source time course. It then visualizes these group-level results. It generates Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ## Cross-correlation analysis
 This section describes the cross-correlation analysis performed for the technical validation of the speech material. This analysis examines the relationship between audiobook onset envelopes and magnetoencephalography (MEG) recordings, drawing inspiration from Petersen et al. (2016) [[doi:10.1152/jn.00527.2016]](https://doi.org/10.1152/jn.00527.2016). The specific settings for this cross-correlation analysis are configured in `settings_speech.m`. The analysis workflow is divided into the following scripts:
