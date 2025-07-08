@@ -124,9 +124,13 @@ The following Python scripts are provided to apply Maxwell filtering to the raw 
 | `plot_trafo.py` | Creates a detailed 3D visualization of a 4x4 head position transformation matrix. It plots the initial and transformed coordinate systems, the translation vector, and the rotation angles. This figure is included in the reports. | 
 | `check_maxfilter_stats.py` | Loads a CSV file of head transformation data and generates two summary figures: one showing histograms of the overall movement distributions, and another displaying scatter plots that compare the amount of movement for each subject. | 
 
+**Example Maxwell filtering report**
+
 An example from the Maxwell filtering report is shown below. This report is generated for each subject for visual quality control and includes a visualization of the estimated head positions, the Power Spectral Densities (PSDs) before and after filtering, and the 3D head position transformation applied to align each run.
 
 ![Maxwell filtering report example](./images/maxwell_filtering_report_example.png)
+
+**Example Coregistration report**
 
 An example of the coregistration report is shown below. This report is created for each subject to allow for visual inspection of the alignment between the sensor and anatomical data.
 
