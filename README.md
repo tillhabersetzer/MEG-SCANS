@@ -18,11 +18,15 @@ The technical validation covers the following aspects:
 * A decoding analysis where models are trained on audiobooks and tested on OLSA sentences.
 
 ### Software used during the analysis
+**Within the analysis pipelines**
 * MATLAB R2023a
 * [FieldTrip toolbox](https://www.fieldtriptoolbox.org/) (version: 20250523) 
 * [mTRF-Toolbox](https://github.com/mickcrosse/mTRF-Toolbox) (version: 2.7)
 * [THE AUDITORY MODELING TOOLBOX](https://amtoolbox.org/) (version: 1.6.0)
+**For BIDS conversion and maxfiltering**
 * Python (version?!)
+**Others**
+* freesurfer
 
 ## Auditory Evoked Fields (AEFs)
 
