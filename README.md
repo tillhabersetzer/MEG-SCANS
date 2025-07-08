@@ -106,15 +106,11 @@ The `helper_functions` directory contains custom functions used across various a
 
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
-| **Plotting** | |
 | `bluewhitered.m` | Generates a divergent blue-white-red colormap, ideal for topographical plots. |
 | `distinguishable_colors.m` | Creates a set of maximally distinct colors, used for plotting data from different subjects. |
-| **Source Analysis** | |
 | `check_diploc.m` | Determines the hemisphere location of a fitted dipole. |
 | `constrained_dipolfitting.m` | Calculates the scalar dipole moment for a fixed-orientation two-dipole model. |
-| **Envelope Calculation** | |
 | `cal_envelope.m` | Computes various types of speech envelopes (e.g., onset, auditory) from raw audio. |
-| **FieldTrip Trial Functions** | |
 | `my_trialfun_audiobook.m` | A custom `trialfun` that defines epochs from the audiobook recordings based on triggers. |
 | `my_trialfun_olsa.m` | A custom `trialfun` that defines epochs from the OLSA recordings. |
 | `read_event_modified.m` | A custom function to read events from Neuromag .fif files, that can be used in `my_trialfun_audiobook.m` as an option.  |
