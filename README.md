@@ -125,7 +125,7 @@ The following Python scripts are provided to apply Maxwell filtering to the raw 
 | `check_maxfilter_stats.py` | Loads a CSV file of head transformation data and generates two summary figures: one showing histograms of the overall movement distributions, and another displaying scatter plots that compare the amount of movement for each subject. | 
 
 An excerpt of the Maxwell filtering report is shown below. This report is created for each subject to allow for visual inspection.
-![Coregistration example](./images/coregistration_report_example.png)
+![Maxwell filtering report example](./images/maxwell_filtering_report_example.png)
 
 An example of the coregistration report is shown below. This report is created for each subject to allow for visual inspection of the alignment between the sensor and anatomical data.
 ![Coregistration example](./images/coregistration_report_example.png)
