@@ -101,10 +101,8 @@ The `audio_envelopes.m` script in the `speech` directory provides a tool for det
 | :--- | :--- | 
 | `audio_envelopes.m` | This script contained in the `speech` directory is an interactive tool for visualizing the speech envelopes used in the cross-correlation and decoding analyses. It processes a selected audiobook file, computes the desired envelope type (e.g., auditory, onset), and generates a multi-panel plot with a slider to easily compare the raw audio waveform against its derived envelope. |
 
+### Helper function for Plotting, Source Analysis, Envelope Calculation and FieldTrip Trial Functions
 The `helper_functions` directory contains custom functions used across various analysis pipelines.
-
-### Plotting, Source Analysis, Envelope Calculation, FieldTrip Trial Functions
-
 
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
