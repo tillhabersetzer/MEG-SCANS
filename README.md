@@ -4,7 +4,7 @@ This repository contains the code used for the technical validation and generati
 
 ## Dataset and Publication
 
-The MEG-SCANS (Stories, Chirps, And Noisy Sentences) dataset provides raw magnetoencephalography (MEG) recordings from 24 German-speaking participants. Each participant listened to approximately one hour of stimuli, including two audiobooks, sentences from the Oldenburger Matrix Sentence Test (OLSA) for Speech Reception Threshold (SRT) assessment, and short up-chirps used to assess MEG signal quality. The dataset comprises MEG data, corresponding audio material (audiobooks, OLSA envelopes, and chirp stimuli), and behavioral audiogram results from hearing screenings. Organized according to the Brain Imaging Data Structure (BIDS), this resource offers a robust benchmark for large-scale encoding/decoding analyses of temporally-resolved brain responses to speech. Comprehensive Matlab and Python code are included to replicate key data validations, ensuring transparency and reproducibility.
+The MEG-SCANS (Stories, Chirps, And Noisy Sentences) dataset provides raw magnetoencephalography (MEG) recordings from 24 German-speaking participants. Each participant listened to approximately one hour of stimuli, including two audiobooks, sentences from the Oldenburger Matrix Sentence Test () for Speech Reception Threshold (SRT) assessment, and short up-chirps used to assess MEG signal quality. The dataset comprises MEG data, corresponding audio material (audiobooks,  envelopes, and chirp stimuli), and behavioral audiogram results from hearing screenings. Organized according to the Brain Imaging Data Structure (BIDS), this resource offers a robust benchmark for large-scale encoding/decoding analyses of temporally-resolved brain responses to speech. Comprehensive Matlab and Python code are included to replicate key data validations, ensuring transparency and reproducibility.
 
 * **Dataset:** [DOI to OpenNeuro dataset]
 * **Data Descriptor Paper:** [DOI to data descriptor paper]
@@ -15,9 +15,9 @@ The technical validation covers the following aspects:
 
 * Computation of Auditory Evoked Fields (AEFs) from chirp stimuli and a dipole fit of their N100m component.
 * A cross-correlation analysis between audiobook envelopes and MEG data.
-* A decoding analysis where models are trained on audiobooks and tested on OLSA sentences.
+* A decoding analysis where models are trained on audiobooks and tested on  sentences.
 
-### Software used during the analysis
+### Software used during the entire analysis
 
 **Within the analysis pipelines**
 * MATLAB R2023a
@@ -26,17 +26,17 @@ The technical validation covers the following aspects:
 * [THE AUDITORY MODELING TOOLBOX](https://amtoolbox.org/) (version: 1.6.0)
   
 **For BIDS conversion and Maxwell filtering**
-* [MNE-Python](https://mne.tools/stable/index.html) (version: 1.9.0)
+* [MNE-Python](https://mne.tools/stable/index.html) (version: 1.9.0) 
 * [MNE-BIDS](https://mne.tools/mne-bids/stable/ind) (version: 0.16.0)
   
 **Others**
-* [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all)
+* [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all) 
 
 ### Running the Pipeline
 
 **Preprocessing**:
 The provided MEG data adheres to the Brain Imaging Data Structure (BIDS) standard, which ensures a clear structure and naming scheme.
-Additionally, all MEG recordings have undergone an initial preprocessing stage using MaxFilter. This initial step includes spatiotemporal signal space separation (tSSS) for noise reduction and correction for head movements. To facilitate analysis across runs, all of a participant's recordings have also been transformed to a common head position, using their first audiobook run (‘task-audiobook1_run-01‘) as the reference.
+Additionally, all MEG recordings have undergone an initial preprocessing stage using MaxFilter. This initial step includes spatiotemporal signal space separation (tSSS) for noise reduction and correction for head movements. To facilitate analysis across multiple runs, all of the participant's recordings have also been transformed to a common head position, using their first audiobook run (‘task-audiobook1_run-01‘) as the reference.
 Maxfiltered files are shared withtin the `derivatives` folder.
 
 **Getting Started**:
@@ -82,13 +82,13 @@ This section describes the cross-correlation analysis performed for the technica
 | `plot_crosscorr.m` | Visualizes the grand-average cross-correlation results and performs a cluster-based permutation test to find significant effects. This script generates the main cross-correlation figures. It is responsible for creating Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ## Decoding analysis
-This section describes the decoding-based analysis used for the technical validation of the speech material, for both audiobook and olsa recording. The analysis aimed to reproduce the results of Vanthornhout et al. (2018) [[doi:10.1007/s10162-018-0654-z]](https://doi.org/10.1007/s10162-018-0654-z) by training a backward model (decoder) on continuous audiobook data and testing its ability to reconstruct the speech envelopes of unseen OLSA sentences. The temporal response function (TRF) framework used for training and evaluating the decoder is described in detail e.g. by Crosse et al. (2021) [[doi:10.3389/fnins.2021.705621]](https://doi.org/10.3389/fnins.2021.705621) and O'Sullivan et al. (2014) [[doi:10.1093/cercor/bht355]](https://doi.org/10.1093/cercor/bht355).
+This section describes the decoding-based analysis used for the technical validation of the speech material, for both audiobook and  recording. The analysis aimed to reproduce the results of Vanthornhout et al. (2018) [[doi:10.1007/s10162-018-0654-z]](https://doi.org/10.1007/s10162-018-0654-z) by training a backward model (decoder) on continuous audiobook data and testing its ability to reconstruct the speech envelopes of unseen  sentences. The temporal response function (TRF) framework used for training and evaluating the decoder is described in detail e.g. by Crosse et al. (2021) [[doi:10.3389/fnins.2021.705621]](https://doi.org/10.3389/fnins.2021.705621) and O'Sullivan et al. (2014) [[doi:10.1093/cercor/bht355]](https://doi.org/10.1093/cercor/bht355).
 The decoding analysis pipeline closely follows the structure of the cross-correlation pipeline. The analysis workflow is divided into the following scripts:
 
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
 | `analysis_pipeline_decoding.m` | Master script that orchestrates the entire decoding analysis pipeline. It calls preprocessing and training functions for each subject in parallel. |
-| `preprocessing_olsa.m` | Prepares OLSA sentence stimuli by individually processing each .wav file into a filtered and resampled auditory envelope. Due to sharing restrictions, the raw .wav files are not provided in this repository, only the final processed envelopes. Therefore, this script is included for transparency but cannot be run directly. |
+| `preprocessing_.m` | Prepares  sentence stimuli by individually processing each .wav file into a filtered and resampled auditory envelope. Due to sharing restrictions, the raw .wav files are not provided in this repository, only the final processed envelopes. Therefore, this script is included for transparency but cannot be run directly. |
 | `preprocessing_audiobooks.m` | Prepares audiobook stimuli by computing the auditory envelope and segmenting it into fixed-length epochs. |
 | `preprocessing_audiobooks_decoding.m` | Prepares a subject's audiobook MEG data and synchronizes it with pre-processed audio envelopes. It rejects invalid trials and truncates all pairs to a uniform length. |
 | `preprocessing_olsa_decoding.m` | Prepares a subject's OLSA MEG data and synchronizes it with the corresponding sentence envelopes. It creates detailed trial information by loading metadata from the events.tsv file. |
@@ -140,5 +140,5 @@ An example of the coregistration report is shown below. This report is created f
 
 The following scripts were used to generate or present the data but are not included in this repository. They are available upon request.
 * BIDS conversion pipeline
-* Experiment presentation scripts (for chirp, audiobook, and OLSA tasks)
+* Experiment presentation scripts (for chirp, audiobook, and  tasks)
 * FreeSurfer `recon-all` batch script
