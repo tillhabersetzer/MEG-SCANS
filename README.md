@@ -20,12 +20,14 @@ The technical validation covers the following aspects:
 ### Software used during the entire analysis
 
 **Within the analysis pipelines**
+Software in this block is required to reproduce the analysis results.
 * MATLAB R2023a
 * [FieldTrip toolbox](https://www.fieldtriptoolbox.org/) (version: 20250523) 
 * [mTRF-Toolbox](https://github.com/mickcrosse/mTRF-Toolbox) (version: 2.7)
 * [THE AUDITORY MODELING TOOLBOX](https://amtoolbox.org/) (version: 1.6.0)
   
 **For BIDS conversion and Maxwell filtering**
+The software listed in the lower blocks is essential for reproducing the foundational preprocessing results.
 * [MNE-Python](https://mne.tools/stable/index.html) (version: 1.9.0) 
 * [MNE-BIDS](https://mne.tools/mne-bids/stable/ind) (version: 0.16.0)
   
