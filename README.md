@@ -44,6 +44,20 @@ Additionally, all MEG recordings have undergone an initial preprocessing stage u
 Maxfiltered files are shared withtin the `derivatives` folder.
 
 **Getting Started**:
+To set up the project and run the analysis pipeline, please follow these steps:
+1.  **Download Code:** Download the code from this repository and save it to a designated folder, for example, `analysis`.
+2.  **Download Data:** Download data from OpenNeuro and save it into a separate folder, such as `bidsdata`.
+3.  **Organize Project Structure:** Place both folders (`analys` and `bids_data`) within a main project directory, for instance, `meg_scans`. Your project structure should resemble:
+    ```
+    meg_scans/
+    ├── analysis/
+    └── bidsdata/
+    ```
+4.  **Install MATLAB Toolboxes:** Install necessary MATLAB toolboxes, depending on analysis pipeline
+    * FieldTrip (always)
+    * mTRF-Toolbox, AMT (Decoding)
+5.  **Configure Settings:** Set up the required settings files for the analysis pipeline.
+
 Each analysis pipeline is controlled by a main settings file (e.g., `settings_chirps.m` or `settings_speech.m`). Before running any analysis, you must edit this file to define the paths to the project folder and required toolboxes.
 The following key paths need to be set:
 * `settings.rootpath`: This is the base path that helps switch between different computer environments (e.g., a local machine vs. a remote server). All other paths are typically constructed relative to this.
