@@ -50,7 +50,7 @@ To set up the project and run the analysis pipeline, please follow these steps:
 3.  **Install MATLAB Toolboxes:** Install necessary MATLAB toolboxes, depending on analysis pipeline and place into folder, for example 'toolboxes'.
     * FieldTrip (always)
     * mTRF-Toolbox (Decoding), AMT (Decoding)
-4.  **Organize Project Structure:** Place both folders (`analys` and `bids_data`) within a main project directory, for instance, `meg_scans`. Your project structure should resemble:
+4.  **Organize Project Structure:** Place all folders (`analysis`, `bidsdata`, `toolboxes`) within a main project directory, for instance, `meg_scans`. Your project structure should resemble:
     ```
     meg_scans/
     ├── analysis/
