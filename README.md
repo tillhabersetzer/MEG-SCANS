@@ -126,6 +126,7 @@ The `helper_functions` directory contains custom functions used across various a
 | :--- | :--- | 
 | [`bluewhitered.m`](https://de.mathworks.com/matlabcentral/fileexchange/4058-bluewhitered) | Generates a divergent blue-white-red colormap, ideal for topographical plots. |
 | [`distinguishable_colors.m`](https://github.com/cortex-lab/MATLAB-tools/blob/master/distinguishable_colors.m) | Creates a set of maximally distinct colors, used for plotting data from different subjects. |
+| [`hatchfill2.m`](https://de.mathworks.com/matlabcentral/fileexchange/53593-hatchfill2) | This function is tool for adding customizable patterns, like lines (hatching) or dots (speckling), to filled shapes in a plot, such as bars, area graphs, or contours. |
 | `check_diploc.m` | Determines the hemisphere location of a fitted dipole. |
 | `constrained_dipolfitting.m` | Calculates the scalar dipole moment for a fixed-orientation two-dipole model. |
 | `cal_envelope.m` | Computes various types of speech envelopes (e.g., onset, auditory) from raw audio. |
