@@ -34,6 +34,9 @@ end
 % Read raw data from the stimulus channel
 stim_raw = ft_read_data(path_dataset,'header',hdr,'chanindx',stim_channel_idx); 
 
+% figure
+% plot(stim_raw)
+
 % Initialize event storage
 filtered_events = struct('type', {}, 'sample', {}, 'value', {}, 'offset', {}, 'duration', {});
 event_count = 0;

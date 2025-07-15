@@ -31,7 +31,7 @@ subject = 'sub-21'; %
 
 %% Load data
 %--------------------------------------------------------------------------
-data     = importdata(fullfile(settings.path2project,'derivatives',subject,'chirp',[subject,'_avgs.mat']));   
+data     = importdata(fullfile(settings.path2derivatives,subject,'chirp',[subject,'_avgs.mat']));   
 avg_grad = data.avg_grad;
 avg_mag  = data.avg_mag;
 

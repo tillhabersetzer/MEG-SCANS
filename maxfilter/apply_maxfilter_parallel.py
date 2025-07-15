@@ -54,9 +54,8 @@ tasknames = ["olsa",
              ]
 
 # path to project (needs to be adjusted)
-# project_dir = Path(r"E:\masterthesis") 
-project_dir = Path(r"/mnt/localSSDPOOL/fiko7761/masterthesis") # / -> makes it an absolute path
-bids_dir = Path(project_dir,"bids_conversion","bids_data")
+project_dir = Path(r"/mnt/localSSDPOOL/fiko7761/meg_scans") # / -> makes it an absolute path
+bids_dir = Path(project_dir,"bidsdata")
 
 # Mark bad channels to prevent noise spreading
 # MEG2143 marked as bad, MEG1112 marked as noisy in scanprotocols
@@ -134,7 +133,7 @@ def setup_logging(log_file_path, logger_name):
 
 # Wrap all per-subject logic into a function
 def process_subject(subject):
-    dir2save = Path(project_dir,"derivatives",subject,"maxfilter")
+    dir2save = Path(bids_dir,"derivatives",subject,"maxfilter")
     if not dir2save.is_dir():
         os.makedirs(dir2save)
         

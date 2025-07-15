@@ -49,7 +49,7 @@ subjectnames  = cell(1,n_subj);
 for sub_idx = 1:n_subj
     subject = sprintf('sub-%02d',subjects(sub_idx));
 
-    data                   = importdata(fullfile(settings.path2project,'derivatives',subject,'chirp',[subject,'_avgs.mat']));   
+    data                   = importdata(fullfile(settings.path2derivatives,subject,'chirp',[subject,'_avgs.mat']));   
     avgs_grad{sub_idx}     = data.avg_grad;
     avgs_mag{sub_idx}      = data.avg_mag;
     n_trials_tot(sub_idx)  = sum(data.n_trials(1,:));
@@ -79,7 +79,7 @@ end
 % Import grand average data
 %--------------------------
 subject   = 'grandaverage';
-data      = importdata(fullfile(settings.path2project,'derivatives','grandaverage','chirp',[subject,'_avgs.mat']));   
+data      = importdata(fullfile(settings.path2derivatives,'grandaverage','chirp',[subject,'_avgs.mat']));   
 gavg_grad = data.gavg_grad;
 gavg_mag  = data.gavg_mag;
 clear data

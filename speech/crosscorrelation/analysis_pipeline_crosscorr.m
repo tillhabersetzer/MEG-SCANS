@@ -36,8 +36,16 @@ cd(current_dir)
 
 %% Script settings 
 %--------------------------------------------------------------------------
+fname_log = 'analysis_pipeline_crosscorr_log.txt';
+
+if exist(fname_log, 'file') == 2
+    delete(fname_log);
+    fprintf('Existing log file "%s" deleted.\n', fname_log);
+end
+
 % Start recording output and timer
-diary('analysis_pipeline_crosscorr_log.txt');  
+diary(fname_log);  
+
 tic; 
 fprintf('--- Starting Cross-Correlation Pipeline ---\n');
 fprintf('Date: %s\n\n', datetime('now', 'Format', 'dd-MMM-yyyy HH:mm:ss'));
@@ -63,22 +71,27 @@ max_workers    = parcluster('local').NumWorkers; % Get the maximum number of wor
 workers_to_use = min(n_subj, max_workers);       % Determine the number of workers to use (the smaller of the two)
 
 % Preprocessing of audio envelopes
+%---------------------------------
 preprocessing_audio(settings)
 
 parpool(workers_to_use);
 parfor sub_idx = 1:n_subj
     % Select subject
+    %---------------
     subject = sprintf('sub-%02d',subjects(sub_idx));
  
     % Propecessing of audiobook MEG recordings 
+    %-----------------------------------------
     preprocessing_crosscorr(subject,settings)
  
     % Computation cross-correlation function
+    %---------------------------------------
     computation_crosscorr(subject,settings)
 
 end % subjects
 
 % Computation grand-average cross-correlation function
+%-----------------------------------------------------
 computation_gavg_crosscorr(subjects,settings)
 
 % Stop timer and log the elapsed time

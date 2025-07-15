@@ -1,19 +1,25 @@
-% settings
+%--------------------------------------------------------------------------
+% Till Habersetzer, 08.07.2025
+% Communication Acoustics, CvO University Oldenburg
+% till.habersetzer@uol.de 
+%--------------------------------------------------------------------------
 
 % ensure that we don't mix up settings
 clear settings
 
 % Define paths
 %-------------
-settings.rootpath = fullfile('/mnt','localSSDPOOL','fiko7761'); % server
-% settings.rootpath = fullfile('M:'); % local computer
+settings.rootpath       = fullfile('/mnt','localSSDPOOL','username'); % server
+% settings.rootpath       = fullfile('M:'); % local computer
+settings.path2project   = fullfile(settings.rootpath,'meg_scans');
+settings.path2toolboxes = fullfile(settings.rootpath,'toolboxes');
 
-settings.path2project     = fullfile(settings.rootpath,'masterthesis');
-settings.path2derivatives = fullfile(settings.path2project,'derivatives');
-settings.path2bids        = fullfile(settings.path2project,'bids_conversion','bids_data');
-settings.path2fieldtrip   = fullfile(settings.rootpath,'toolboxes','fieldtrip-20250523');
-settings.path2amtoolbox   = fullfile(settings.rootpath,'toolboxes','amtoolbox-1.6.0');
-settings.path2mtrftoolbox = fullfile(settings.rootpath,'toolboxes','mTRF-Toolbox-2.7','mtrf');
+% Defined based on upper paths
+settings.path2bids        = fullfile(settings.path2project,'bidsdata');
+settings.path2derivatives = fullfile(settings.path2bids,'derivatives');
+settings.path2fieldtrip   = fullfile(settings.path2toolboxes,'fieldtrip-20250523');
+settings.path2amtoolbox   = fullfile(settings.path2toolboxes,'amtoolbox-1.6.0');
+settings.path2mtrftoolbox = fullfile(settings.path2toolboxes,'mTRF-Toolbox-2.7','mtrf');
 
 % Other settings
 %---------------
@@ -46,14 +52,13 @@ settings.decoding.olsa.poststim    = 0.5;
 settings.decoding.olsa.padding     = 10; %s zeropad olsa wav files before filtering (in sec)
 
 % mTRF-model hyperparameters
-settings.decoding.decoder.drct        = -1; % direction: backward model
-settings.decoding.decoder.tmin        = 0; % minimum time lag (ms)
-settings.decoding.decoder.tmax        = 75; % maximum time lag (ms)
-settings.decoding.decoder.lambda_exp  = -14:2:10; % exponent regularization values
-settings.decoding.decoder.zeropad     = 1; % zero-pad the outer rows of the design matrix or delete them
-settings.decoding.decoder.corr_metric = 'Spearman'; % 'Pearson' specifiy accuracy metric
-settings.decoding.decoder.fast        = 1; % use the fast cross-validation method (requires more memory)
-settings.decoding.decoder.dim         = 2; % work along the rows, observations in columns
-settings.decoding.decoder.type        = 'multi'; % use all lags simultaneously to fit a multi-lag model
-
-
+settings.decoding.decoder.n_portion_training = 0.8; % percentage of trials used for training
+settings.decoding.decoder.drct               = -1; % direction: backward model
+settings.decoding.decoder.tmin               = 0; % minimum time lag (ms)
+settings.decoding.decoder.tmax               = 250; % maximum time lag (ms)
+settings.decoding.decoder.lambda_exp         = -6:2:6; % exponent regularization values
+settings.decoding.decoder.zeropad            = 1; % zero-pad the outer rows of the design matrix or delete them
+settings.decoding.decoder.corr_metric        = 'Spearman'; % 'Pearson' specifiy accuracy metric
+settings.decoding.decoder.fast               = 1; % use the fast cross-validation method (requires more memory)
+settings.decoding.decoder.dim                = 2; % work along the rows, observations in columns
+settings.decoding.decoder.type               = 'multi'; % use all lags simultaneously to fit a multi-lag model

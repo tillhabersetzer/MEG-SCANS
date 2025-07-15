@@ -38,7 +38,7 @@ timelags = settings.crosscorr.timelags;
 
 %% Import data
 %----------------------------------------------------------------------
-data         = importdata(fullfile(settings.path2project,'derivatives',subject,'speech',sprintf('%s_preprocessed_crosscorr.mat',subject)));   
+data         = importdata(fullfile(settings.path2derivatives,subject,'speech',sprintf('%s_preprocessed_crosscorr.mat',subject)));   
 epochs_audio = data.epochs_audio;
 epochs_neuro = data.epochs_neuro;
 n_trials     = length(epochs_neuro.trial);

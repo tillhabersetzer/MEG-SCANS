@@ -59,6 +59,14 @@ padding_samples = round(padding*fs_neuro);
 audio_envelopes    = struct();
 audio_envelopes.fs = fs_down;
 
+% Save results
+%--------------
+dir2save = fullfile(settings.path2derivatives,'stimuli');
+% dir2save = fullfile(stim_dir,'envelopes');
+if ~exist(dir2save,'dir')
+    mkdir(dir2save)
+end
+
 for stn_idx = 1:n_sentences % loop over sentences
 
     fname_audio = fnames_audio{stn_idx};
@@ -106,18 +114,19 @@ for stn_idx = 1:n_sentences % loop over sentences
 
     % Resample the extracted epoch to the final target frequency (fs_down)
     [~, base_name, ~]                                  = fileparts(fname_audio);  
-    audio_envelopes.(sprintf('envelope_%s',base_name)) = resample(envelope_filtered, fs_down, fs_neuro);
+    envelope_filtered_resampled                        = resample(envelope_filtered, fs_down, fs_neuro);
+    audio_envelopes.(sprintf('envelope_%s',base_name)) = envelope_filtered_resampled;
     fprintf('Sentence %i/%i (%s) processed.\n',stn_idx,n_sentences,fname_audio)
-    clear envelope envelope_resampled envelope_padded envelope_filtered
+
+    % Additionally, save each envelope as a wav file. If olsa sentences are
+    % removed, the dataset is not bids compliant anymore cause stim files
+    % are missing.
+    % audiowrite(fullfile(dir2save,sprintf('%s.wav',base_name)),envelope_filtered_resampled,fs_down);
+
+    clear envelope envelope_resampled envelope_padded envelope_filtered envelope_filtered_resampled 
 
 end % sentences
     
-% Save results
-%--------------
-dir2save = fullfile(settings.path2derivatives,'stimuli');
-if ~exist(dir2save,'dir')
-    mkdir(dir2save)
-end
 fname = 'preprocessed_olsa_envelopes_decoding.mat';
 
 save(fullfile(dir2save,fname),'audio_envelopes','-v7.3'); 

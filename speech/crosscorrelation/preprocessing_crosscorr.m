@@ -89,13 +89,13 @@ for task_idx = 1:2
             cfg                     = [];
             cfg.trialfun            = 'my_trialfun_audiobook'; 
             cfg.dataset             = event_path; % path should always point to original bids-path
-            cfg.trialdef.method     = 'fieldtrip';
+            cfg.trialdef.method     = 'bids';
             cfg.trialdef.trialdur   = trialdur; 
             cfg.trialdef.eventvalue = 1;      
             % bids
-            % cfg.trialdef.eventtype  = {'audiobook 1s'};
+            cfg.trialdef.eventtype  = 'audiobook 1s';
             % fieldtrip
-            cfg.trialdef.eventtype  = 'STI101';   
+            % cfg.trialdef.eventtype  = 'STI101';   
             cfg                     = ft_definetrial(cfg);
 
             trl = cfg.trl;

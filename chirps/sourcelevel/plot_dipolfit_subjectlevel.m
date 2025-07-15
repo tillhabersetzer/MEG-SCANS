@@ -53,7 +53,7 @@ addpath(fullfile(settings.path2project,'analysis','helper_functions'))
 
 %% Load data
 %--------------------------------------------------------------------------
-data = importdata(fullfile(settings.path2project,'derivatives',subject,'chirp',sprintf('%s_dipolfits.mat',subject))); 
+data = importdata(fullfile(settings.path2derivatives,subject,'chirp',sprintf('%s_dipolfits.mat',subject))); 
 
 % Select correct data based on channel selection
 switch chan2plot

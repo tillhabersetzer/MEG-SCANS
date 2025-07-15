@@ -63,7 +63,7 @@ for sub_idx = 1:n_subj
     subject               = sprintf('sub-%02d',subjects(sub_idx));
     subjectnames{sub_idx} = subject;
 
-    data = importdata(fullfile(settings.path2project,'derivatives',subject,'chirp',sprintf('%s_dipolfits.mat',subject))); 
+    data = importdata(fullfile(settings.path2derivatives,subject,'chirp',sprintf('%s_dipolfits.mat',subject))); 
 
     % Select correct data based on channel selection
     switch chan2plot
@@ -249,9 +249,9 @@ for lr_idx = 1:2
     patch([timevec,fliplr(timevec)],[avg_dipole_timecourse_vec(idxs2plot(3),:)+avg_dipole_timecourse_vec_sem(idxs2plot(3),:),fliplr(avg_dipole_timecourse_vec(idxs2plot(3),:)-avg_dipole_timecourse_vec_sem(idxs2plot(3),:))],cmap{3},'FaceAlpha',0.1,'LineStyle','none','HandleVisibility','off');
     arrayfun(@(i) plot(timevec, avg_dipole_timecourse_vec(idxs2plot(i),:), '-', 'color',cmap{i},'LineWidth',2), 1:3) 
 
-    if lr_idx ==2
+    % if lr_idx ==2
         xlabel('t / ms')
-    end
+    % end
     ylabel('dipole moment / nAm'); 
     legend(sp(1),{'timewindow dipolfit','x', 'y', 'z'},'Location','southwest', 'FontSize', legend_font_size);
     axis(axisvec) 

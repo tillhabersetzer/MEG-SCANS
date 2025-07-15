@@ -38,13 +38,13 @@ plot_results = false;
 %--------------------------------------------------------------------------
 
 % Load audiobooks
-data                   = importdata(fullfile(settings.path2project,'derivatives',subject,'speech',sprintf('%s_preprocessed_audiobooks_decoding.mat',subject)));   
+data                   = importdata(fullfile(settings.path2derivatives,subject,'speech',sprintf('%s_preprocessed_audiobooks_decoding.mat',subject)));   
 epochs_audio_audiobook = data.epochs_audio;
 epochs_neuro_audiobook = data.epochs_neuro;
 n_trials               = length(epochs_neuro_audiobook.trial);
 clear data
 % Load olsa
-data              = importdata(fullfile(settings.path2project,'derivatives',subject,'speech',sprintf('%s_preprocessed_olsa_decoding.mat',subject)));   
+data              = importdata(fullfile(settings.path2derivatives,subject,'speech',sprintf('%s_preprocessed_olsa_decoding.mat',subject)));   
 epochs_audio_olsa = data.epochs_audio;
 epochs_neuro_olsa = data.epochs_neuro;
 event_description = data.event_description;
@@ -55,6 +55,29 @@ fprintf("\nData from %s is loaded.\n",subject)
 n_trials_olsa = length(epochs_neuro_olsa.trial);
 if ~isequal(n_trials_olsa,120)
     error('%s: Unexpected number of olsa trials (%i)!',subject, n_trials_olsa)
+end
+
+%% Adjust all Olsa sentences to same length
+%--------------------------------------------------------------------------
+% Necessary for control condition of shuffled data
+% Zeropad all trials to maximum length
+% Same amount of samples for correlation
+
+% min_samples = inf;
+max_samples = -inf;
+n_chan      = size(epochs_neuro_olsa.trial{1},1);
+n_samples = zeros(1,120);
+for trl_idx = 1:120
+    n_samples(trl_idx) = length(epochs_audio_olsa{trl_idx});
+    % min_samples        = min([min_samples,n_samples(trl_idx)]);
+    max_samples        = max([max_samples,n_samples(trl_idx)]);
+end
+for trl_idx = 1:120
+    epochs_audio_olsa{trl_idx}       = [epochs_audio_olsa{trl_idx},zeros(1,max_samples-n_samples(trl_idx))];
+    epochs_neuro_olsa.trial{trl_idx} = [epochs_neuro_olsa.trial{trl_idx},zeros(n_chan,max_samples-n_samples(trl_idx))];
+
+    % epochs_audio_olsa_padded{trl_idx}       = epochs_audio_olsa_padded{trl_idx}(1:min_samples);
+    % epochs_neuro_olsa_padded.trial{trl_idx} = epochs_neuro_olsa_padded.trial{trl_idx}(:,1:min_samples);
 end
 
 %% Apply zscoring
@@ -68,53 +91,75 @@ end
 % lost if each channel were z-scored independently.
 % For the audio data, the relative power across features is preserved.
 
+% Note: Magnetometers and gradiometers are normalized separately before 
+% being combined for the analysis, due to their different physical units 
+% and scales.
+
 if apply_zscoring   
     % Audiobooks
     %----------------------------------------------------------------------
     epochs_audio_audiobook_concat = horzcat(epochs_audio_audiobook{:});
     epochs_neuro_audiobook_concat = horzcat(epochs_neuro_audiobook.trial{:});
-    
-    mean_val_audio = mean(epochs_audio_audiobook_concat,2);
-    std_val_audio  = std(epochs_audio_audiobook_concat,0,2);
-    mean_val_neuro = mean(epochs_neuro_audiobook_concat,'all');
-    std_val_neuro  = std(epochs_neuro_audiobook_concat,0,'all');
+
+    % labels mag 
+    idx_mag = endsWith(epochs_neuro_audiobook.label,'1');
+    if sum(idx_mag)~=102; error('%s: Unexpected number of magnetometer channels (%i)!',subject,sum(idx_mag)); end
+    % labels_grad
+    idx_grad = endsWith(epochs_neuro_audiobook.label,{'2','3'});
+    if sum(idx_grad)~=204; error('%s: Unexpected number of magnetometer channels (%i)!',subject,sum(idx_grad)); end
+
+    mean_val_audio      = mean(epochs_audio_audiobook_concat,2);
+    std_val_audio       = std(epochs_audio_audiobook_concat,0,2);
+    mean_val_neuro_mag  = mean(epochs_neuro_audiobook_concat(idx_mag,:),'all');
+    std_val_neuro_mag   = std(epochs_neuro_audiobook_concat(idx_mag,:),0,'all');
+    mean_val_neuro_grad = mean(epochs_neuro_audiobook_concat(idx_grad,:),'all');
+    std_val_neuro_grad  = std(epochs_neuro_audiobook_concat(idx_grad,:),0,'all');
     
     for trl_idx = 1:n_trials
         % audio
         epochs_audio_audiobook{trl_idx} = (epochs_audio_audiobook{trl_idx}-mean_val_audio)./std_val_audio;
         % neuro
-        epochs_neuro_audiobook.trial{trl_idx} = (epochs_neuro_audiobook.trial{trl_idx}-mean_val_neuro)./std_val_neuro;
+        epochs_neuro_audiobook.trial{trl_idx}(idx_mag,:)  = (epochs_neuro_audiobook.trial{trl_idx}(idx_mag,:)-mean_val_neuro_mag)./std_val_neuro_mag;
+        epochs_neuro_audiobook.trial{trl_idx}(idx_grad,:) = (epochs_neuro_audiobook.trial{trl_idx}(idx_grad,:)-mean_val_neuro_grad)./std_val_neuro_grad;
     end
-    clear epochs_audio_audiobook_concat epochs_neuro_audiobook_concat mean_val_audio std_val_audio mean_val_neuro std_val_neuro
+    clear epochs_audio_audiobook_concat epochs_neuro_audiobook_concat mean_val_audio std_val_audio mean_val_neuro_mag std_val_neuro_mag mean_val_neuro_grad std_val_neuro_grad
     
     % Olsa
     %----------------------------------------------------------------------
     epochs_audio_olsa_concat = horzcat(epochs_audio_olsa{:});
     epochs_neuro_olsa_concat = horzcat(epochs_neuro_olsa.trial{:});
+
+    % labels mag 
+    idx_mag = endsWith(epochs_neuro_olsa.label,'1');
+    if sum(idx_mag)~=102; error('%s: Unexpected number of magnetometer channels (%i)!',subject,sum(idx_mag)); end
+    % labels_grad
+    idx_grad = endsWith(epochs_neuro_olsa.label,{'2','3'});
+    if sum(idx_grad)~=204; error('%s: Unexpected number of magnetometer channels (%i)!',subject,sum(idx_grad)); end
     
-    mean_val_audio = mean(epochs_audio_olsa_concat,2);
-    std_val_audio  = std(epochs_audio_olsa_concat,0,2);
-    mean_val_neuro = mean(epochs_neuro_olsa_concat,'all');
-    std_val_neuro  = std(epochs_neuro_olsa_concat,0,'all');
+    mean_val_audio      = mean(epochs_audio_olsa_concat,2);
+    std_val_audio       = std(epochs_audio_olsa_concat,0,2);
+    mean_val_neuro_mag  = mean(epochs_neuro_olsa_concat(idx_mag,:),'all');
+    std_val_neuro_mag   = std(epochs_neuro_olsa_concat(idx_mag,:),0,'all');
+    mean_val_neuro_grad = mean(epochs_neuro_olsa_concat(idx_grad,:),'all');
+    std_val_neuro_grad  = std(epochs_neuro_olsa_concat(idx_grad,:),0,'all');
 
     for trl_idx = 1:n_trials_olsa
         % audio
         epochs_audio_olsa{trl_idx} = (epochs_audio_olsa{trl_idx}-mean_val_audio)./std_val_audio;
         % neuro
-        epochs_neuro_olsa.trial{trl_idx} = (epochs_neuro_olsa.trial{trl_idx}-mean_val_neuro)./std_val_neuro;
+        epochs_neuro_olsa.trial{trl_idx}(idx_mag,:)  = (epochs_neuro_olsa.trial{trl_idx}(idx_mag,:)-mean_val_neuro_mag)./std_val_neuro_mag;
+        epochs_neuro_olsa.trial{trl_idx}(idx_grad,:) = (epochs_neuro_olsa.trial{trl_idx}(idx_grad,:)-mean_val_neuro_grad)./std_val_neuro_grad;
     end
-    clear epochs_audio_olsa_concat epochs_neuro_olsa_concat mean_val_audio std_val_audio mean_val_neuro std_val_neuro
+    clear epochs_audio_audiobook_concat epochs_neuro_audiobook_concat mean_val_audio std_val_audio mean_val_neuro_mag std_val_neuro_mag mean_val_neuro_grad std_val_neuro_grad
     fprintf("\n %s: Zcoring finished.\n",subject)
 
 end
 
-
 %% Train decoder on audio books
 %--------------------------------------------------------------------------
 
-n_trials_train = ceil(0.8*n_trials); % number of training trials
+n_trials_train = ceil(settings.decoding.decoder.n_portion_training*n_trials); % number of training trials
 n_trials_test  = n_trials - n_trials_train; % number of test trials
-
 
 % Cross-validation for optimization
 %----------------------------------
@@ -258,7 +303,55 @@ clear chanidx1 chanidx2
                                           model,...
                                           'zeropad', settings.decoding.decoder.zeropad, ...
                                           'dim', settings.decoding.decoder.dim, ...
-                                          'corr', settings.decoding.decoder.corr_metric);   
+                                          'corr', settings.decoding.decoder.corr_metric); 
+
+% Add control condition: Randomly shuffled sentences
+%---------------------------------------------------
+% All trials must have same length -> zeropad, but 
+% epochs_audio_olsa_padded = epochs_audio_olsa;
+% epochs_neuro_olsa_padded = epochs_neuro_olsa;
+% min_samples = inf;
+% % max_samples = -inf;
+% n_chan      = size(epochs_neuro_olsa_padded.trial{1},1);
+% n_samples = zeros(1,120);
+% for trl_idx = 1:120
+%     n_samples(trl_idx) = length(epochs_audio_olsa{trl_idx});
+%     min_samples        = min([min_samples,n_samples(trl_idx)]);
+%     % max_samples        = max([max_samples,n_samples(trl_idx)]);
+% end
+% for trl_idx = 1:120
+%     % epochs_audio_olsa_padded{trl_idx}       = [epochs_audio_olsa_padded{trl_idx},zeros(1,max_samples-n_samples(trl_idx))];
+%     % epochs_neuro_olsa_padded.trial{trl_idx} = [epochs_neuro_olsa_padded.trial{trl_idx},zeros(n_chan,max_samples-n_samples(trl_idx))];
+% 
+%     epochs_audio_olsa_padded{trl_idx}       = epochs_audio_olsa_padded{trl_idx}(1:min_samples);
+%     epochs_neuro_olsa_padded.trial{trl_idx} = epochs_neuro_olsa_padded.trial{trl_idx}(:,1:min_samples);
+% end
+
+% Do it n_permutations times
+%---------------------------
+n_permutations          = 100;
+stats_olsa_shuffled     = stats_olsa;
+stats_olsa_shuffled.r   = zeros(120,n_permutations);
+stats_olsa_shuffled.err = zeros(120,n_permutations);
+rng("shuffle")
+for shuffle_idx = 1:n_permutations
+    p = randperm(120);
+    while any((p - (1:120))==0) % check if any element is 1 
+        p = randperm(120);
+        fprintf('%s: Shuffled again.\n',subject)
+    end
+    
+    [~,stats_shuffled] = mTRFpredict(epochs_audio_olsa(p), ...
+                                     epochs_neuro_olsa.trial, ...
+                                     model,...
+                                     'zeropad', settings.decoding.decoder.zeropad, ...
+                                     'dim', settings.decoding.decoder.dim, ...
+                                     'corr', settings.decoding.decoder.corr_metric); 
+
+    stats_olsa_shuffled.r(:,shuffle_idx)   = stats_shuffled.r;
+    stats_olsa_shuffled.err(:,shuffle_idx) = stats_shuffled.err;
+    % fprintf('%s: Olsa permutation %i/%i finished.\n',subject,shuffle_idx,n_permutations)
+end
 
 %% Save results
 %--------------
@@ -268,12 +361,13 @@ if ~exist(dir2save,'dir')
 end
 fname = sprintf('%s_decoding.mat',subject);
 
-results                   = strcut();
-results.eval_model        = eval_model; % evaluation of trained model
-results.stats_olsa        = stats_olsa;
-results.sentences_pred    = sentences_pred;
-results.sentences_orig    = epochs_audio_olsa;
-results.event_description = event_description;
+results                     = struct();
+results.eval_model          = eval_model; % evaluation of trained model
+results.stats_olsa          = stats_olsa;
+results.stats_olsa_shuffled = stats_olsa_shuffled;
+results.sentences_pred      = sentences_pred;
+results.sentences_orig      = epochs_audio_olsa';
+results.event_description   = event_description;
 
 save(fullfile(dir2save,fname),'results','-v7.3'); 
 fprintf("\n%s from %s saved.\n",fname,subject)

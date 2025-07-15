@@ -47,6 +47,8 @@ bpfreq  = settings.bpfreq;
 prestim  = settings.trialdef.prestim;
 poststim = settings.trialdef.poststim;
 
+% Epoch rejection
+apply_epoch_rejection = settings.apply_epoch_rejection;
 % Threshold
 z_value_threshold = settings.z_value_threshold;
 
@@ -222,23 +224,29 @@ for sub_idx = 1:n_subj
     % cfg.channel     = 'megmag';
     % epochs_mag      = ft_rejectvisual(cfg,epochs_mag);
 
-    cfg                              = [];
-    cfg.artfctdef.zvalue.channel     = 'megplanar';
-    cfg.artfctdef.zvalue.interactive = 'no'; % make plot interactive
-    cfg.artfctdef.zvalue.cutoff      = z_value_threshold;
-    [~,artifacts_grad]               = ft_artifact_zvalue(cfg,epochs_grad);
+    if apply_epoch_rejection
 
-    cfg.artfctdef.zvalue.channel     = 'megmag';
-    [~,artifacts_mag]                = ft_artifact_zvalue(cfg,epochs_mag);
+        cfg                              = [];
+        cfg.artfctdef.zvalue.channel     = 'megplanar';
+        cfg.artfctdef.zvalue.interactive = 'no'; % make plot interactive
+        cfg.artfctdef.zvalue.cutoff      = z_value_threshold;
+        [~,artifacts_grad]               = ft_artifact_zvalue(cfg,epochs_grad);
+    
+        cfg.artfctdef.zvalue.channel     = 'megmag';
+        [~,artifacts_mag]                = ft_artifact_zvalue(cfg,epochs_mag);
+    
+        cfg                              = [];
+        cfg.artfctdef.zvalue.artifact    = artifacts_grad;
+        epochs_grad                      = ft_rejectartifact(cfg,epochs_grad);
+    
+        cfg.artfctdef.zvalue.artifact    = artifacts_mag;
+        epochs_mag                       = ft_rejectartifact(cfg,epochs_mag);
 
-    cfg                              = [];
-    cfg.artfctdef.zvalue.artifact    = artifacts_grad;
-    epochs_grad                      = ft_rejectartifact(cfg,epochs_grad);
-    n_trials_grad(2)                 = length(epochs_grad.trial); % count trials
+    end
 
-    cfg.artfctdef.zvalue.artifact    = artifacts_mag;
-    epochs_mag                       = ft_rejectartifact(cfg,epochs_mag);
-    n_trials_mag(2)                  = length(epochs_mag.trial); % count trials
+    % count trials
+    n_trials_grad(2) = length(epochs_grad.trial); 
+    n_trials_mag(2)  = length(epochs_mag.trial); 
 
     %% Apply baseline correction
     %---------------------------

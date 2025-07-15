@@ -15,7 +15,9 @@ import os.path as op
 
 #%% Load the CSV file and organize data
 #------------------------------------------------------------------------------
-df = pd.read_csv(op.join(r"M:\masterthesis\analysis\maxfilter","transformation_check.csv"), sep=';')
+# path4data = op.join(r"/mnt/localSSDPOOL/fiko7761/meg_scans/analysis/maxfilter","transformation_check.csv")
+path4data = op.join(r"M:\meg_scans\analysis\maxfilter","transformation_check.csv")
+df = pd.read_csv(op.join(path4data), sep=';')
 
 # Extract subject names
 subjects = df.iloc[:, 0]

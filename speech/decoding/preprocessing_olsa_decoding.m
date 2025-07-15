@@ -88,12 +88,12 @@ if isfile(data_path)
  
     % Add event_description
     %----------------------
-    event_description            = struct();
+    event_description              = struct();
     % Extraxt list and sentence numbers
     event_description.list_num     = trl(:,5);
     event_description.sentence_num = trl(:,6);
     % Load events.tsv file to get additional event information
-    event        = readtable(strrep(event_path,'meg.fif','events.tsv'),'FileType', 'text', 'Delimiter', '\t');
+    event                          = readtable(strrep(event_path,'meg.fif','events.tsv'),'FileType', 'text', 'Delimiter', '\t');
     event_description.snrs         = event.SNR;
     event_description.intells      = event.intelligibility;
     event_description.playlist     = event.stim_file;
