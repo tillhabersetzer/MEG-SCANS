@@ -114,10 +114,11 @@ The decoding analysis pipeline closely follows the structure of the cross-correl
 | `plot_decoding.m` | Analyzes and visualizes the results of the decoding pipeline. It plots model training performance and the generalization results on the OLSA task. This script is responsible for creating Figure XX in the publication ([DOI to data descriptor paper]). |
 
 ## Additional functions
-The `audio_envelopes.m` script in the `speech` directory provides a tool for detailed visualization of the envelopes used in both the cross-correlation and decoding analyses.
+The `audio_envelopes_audiobook.m` `audio_envelopes_olsa.m` scripts in the `speech` directory provide a tool for detailed visualization of the envelopes used in both the cross-correlation and decoding analyses.
 | Script Name | Description |                                                                                                                                                                                               
 | :--- | :--- | 
-| `audio_envelopes.m` | This script contained in the `speech` directory is an interactive tool for visualizing the speech envelopes used in the cross-correlation and decoding analyses. It processes a selected audiobook file, computes the desired envelope type (e.g., auditory, onset), and generates a multi-panel plot with a slider to easily compare the raw audio waveform against its derived envelope. |
+| `audio_envelopes_audiobook.m` | This script contained in the `speech` directory is an interactive tool for visualizing the speech envelopes used in the cross-correlation and decoding analyses. It processes a selected audiobook file, computes the desired envelope type (e.g., auditory, onset), and generates a multi-panel plot with a slider to easily compare the raw audio waveform against its derived envelope. |
+| `audio_envelopes_olsa.m` | This script processes OLSA speech stimuli to extract auditory envelopes and presents an interactive GUI for sentence-by-sentence visual comparison of the original audio and its computed envelope. The script cannot be successfully executed without access to the OLSA sentence files. |
 
 ### Helper function for Plotting, Source Analysis, Envelope Calculation and FieldTrip Trial Functions
 The `helper_functions` directory contains custom functions used across various analysis pipelines.
