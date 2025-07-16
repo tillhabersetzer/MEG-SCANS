@@ -8,6 +8,7 @@ The MEG-SCANS (Stories, Chirps, And Noisy Sentences) dataset provides raw magnet
 
 * **Dataset:** [doi:10.18112/openneuro.ds006468.v1.0.0](https://doi.org/10.18112/openneuro.ds006468.v1.0.0)
 * **Data Descriptor Paper:** [DOI to data descriptor paper]
+* **Code archived with Zenodo:** [![DOI](https://zenodo.org/badge/1008625584.svg)](https://doi.org/10.5281/zenodo.15947481)
 
 ## Technical Validation Overview
 
