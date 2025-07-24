@@ -121,8 +121,6 @@ The `audio_envelopes_audiobook.m` `audio_envelopes_olsa.m` scripts in the `speec
 | `audio_envelopes_audiobook.m` | This script contained in the `speech` directory is an interactive tool for visualizing the speech envelopes used in the cross-correlation and decoding analyses. It processes a selected audiobook file, computes the desired envelope type (e.g., auditory, onset), and generates a multi-panel plot with a slider to easily compare the raw audio waveform against its derived envelope. |
 | `audio_envelopes_olsa.m` | This script processes OLSA speech stimuli to extract auditory envelopes and presents an interactive GUI for sentence-by-sentence visual comparison of the original audio and its computed envelope. The script cannot be successfully executed without access to the OLSA sentence files. |
 
-The `behavioral` directory includes `plot_audiograms.m`, a script for visualizing audiograms for all subjects.
-
 ### Helper function for Plotting, Source Analysis, Envelope Calculation and FieldTrip Trial Functions
 The `helper_functions` directory contains custom functions used across various analysis pipelines.
 
@@ -137,6 +135,13 @@ The `helper_functions` directory contains custom functions used across various a
 | `my_trialfun_audiobook.m` | A custom `trialfun` that defines epochs from the audiobook recordings based on triggers. |
 | `my_trialfun_olsa.m` | A custom `trialfun` that defines epochs from the OLSA recordings. |
 | `read_event_modified.m` | A custom function to read events from Neuromag .fif files, that can be used in `my_trialfun_audiobook.m` as an option.  |
+
+### Behavioral data
+The `behavioral` directory includes `plot_audiograms.m`, a script for visualizing audiograms for all subjects.
+
+| Script Name | Description |                                                                                                                                                                                               
+| :--- | :--- | 
+| `plot_audiograms.m` | Visualizing audiograms of left and right ear with across all subjects. |
 
 ### Maxfilter 
 The following Python scripts are provided to apply Maxwell filtering to the raw BIDS data and visualize the results.
