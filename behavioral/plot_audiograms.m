@@ -62,7 +62,7 @@ for i = 1:n_sub
     plot(frequency/1000,audiogram_l(i,:),'-o');
     hold on
 end
-% Add mean adn std
+% Add mean and std
 errorbar(axs{2},frequency/1000,mean(audiogram_l,1),std(audiogram_l,1),'k-o','LineWidth',2)
 
 legend([subjectnames,'mean + std'],'Location','eastoutside');
@@ -71,7 +71,28 @@ xlabel('f / kHz')
 ylabel(' Level / dB HL')
 grid on
 
-
 set([axs{:}],'xtick', frequency/1000, 'xticklabel',{'0.125','0.25','0.5','0.75','1','1.5','2','3','4','6','8','10'})
 set([axs{:}],'XScale', 'log');
 set([axs{:}], 'YDir','reverse','ylim',[-10,40])
+
+%% Compute and plot Pure-tone-average-4 (PTA4) 
+%--------------------------------------------------------------------------
+% average hearing thresholds for frequencies of 500, 1000, 2000, and 4000 Hz
+
+idx    = ismember(frequency,[500,1000,2000,4000]);
+pta4_l = squeeze(mean(audiogram_l(:,idx),2))'; 
+pta4_r = squeeze(mean(audiogram_r(:,idx),2))'; 
+
+% Plot
+%-----
+figure
+plot(1:n_sub,pta4_l,'b--x','Markersize',15,'LineWidth',2)
+hold on
+plot(1:n_sub,pta4_r,'r--x','Markersize',15,'LineWidth',2)
+ylabel('PTA4 / dB HL')
+set(gca,'xtick', 1:n_sub, 'xticklabel',subjectnames)
+xtickangle(45);
+xlim([0.5,n_sub+0.5])
+title('PTA4')
+grid('on')
+legend({'left ear','right ear'})
