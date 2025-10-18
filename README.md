@@ -35,7 +35,8 @@ The software listed in the lower blocks is essential for reproducing the foundat
 * [MNE-BIDS](https://mne.tools/mne-bids/stable/ind) (version: 0.16.0)
   
 **Others**
-* [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all) 
+* [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (version: 7.4.1) (recon-all)
+* [Montreal Forced Aligner](https://montreal-forced-aligner.readthedocs.io/) (version: 3.3.7) Forced Alignment of audio files with their orthographic transcription.
 
 ### Running the Pipeline
 
