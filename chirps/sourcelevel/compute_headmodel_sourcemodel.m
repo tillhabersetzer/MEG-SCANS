@@ -28,7 +28,7 @@
 %   - A single 'report-coregistration.html' file containing all alignment plots.
 %
 % To run from the command line (linux server):
-% matlab -nodisplay -nosplash -r "compute_headmodel_sourcemodel; exit;"
+% matlab2024b -nodisplay -nosplash -r "compute_headmodel_sourcemodel; exit;"
 %--------------------------------------------------------------------------
 
 close all

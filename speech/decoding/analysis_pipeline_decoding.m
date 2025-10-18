@@ -18,7 +18,7 @@
 %   - Logs the entire process and total execution time.
 %
 % To run from the command line:
-% matlab -nodisplay -nosplash -r "analysis_pipeline_decoding; exit;"
+% matlab2024b -nodisplay -nosplash -r "analysis_pipeline_decoding; exit;"
 %--------------------------------------------------------------------------
 
 close all
@@ -76,7 +76,7 @@ workers_to_use = min(n_subj, max_workers);       % Determine the number of worke
 
 % Preprocessing of olsa envelopes
 %--------------------------------
-% preprocessing_olsa(settings) % -> can't be used, raw olsa sentences not provided
+preprocessing_olsa(settings)
 % Preprocessing of audiobook envelopes
 %-------------------------------------
 preprocessing_audiobooks(settings)

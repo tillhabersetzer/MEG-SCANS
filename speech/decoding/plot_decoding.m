@@ -469,11 +469,23 @@ fprintf('\nIntelligibility - Correlation Coefficient: Spearman correlation %.3f 
 fprintf('\n Pairswise difference between Intelligibility %i%% and %i%% has mean equal to zero: %s (p=%.5f).\n', intelli_vec(1), intelli_vec(end), string(logical(~httest)), pttest);
 
 % Compute paired-samples t-test between sorted and shuffled audiobooks 
-% (subplot(1,3,3)
-[httest,pttest] = ttest(model_r(1,:),model_r(2,:));
+[httest,pttest,ci,stats] = ttest(model_r(1,:),model_r(2,:));
 fprintf('\n Pairswise difference between sorted and shuffled audiobook has mean equal to zero: %s (p=%.5f).\n', string(logical(~httest)), pttest);
 
-%% Final plot for paper
+% Get the values you need from the 'stats' output
+t_statistic = stats.tstat;
+df          = stats.df;
+
+% Average correlation values across participants for audiobooks
+%--------------------------------------------------------------
+
+gavg_audiobook_corr     = mean(model_r,2); % mean
+gavg_audiobook_corr_std = std(model_r,0,2)./sqrt(n_subj); % standard error
+
+fprintf('Mean model performance on audiobooks (sorted): %.4f +- %.4f .\n', gavg_audiobook_corr(1),gavg_audiobook_corr_std(1));
+fprintf('Mean model performance on audiobooks (shuffled): %.4f +- %.4f .\n', gavg_audiobook_corr(2),gavg_audiobook_corr_std(2));
+
+%% Final plot for paper (1st attempt)
 %--------------------------------------------------------------------------
 axis_font_size   = 16; 
 legend_font_size = 16;
@@ -578,6 +590,171 @@ ax1     = gca; % Get current axes
 xLimits = get(ax1, 'XLim');
 yLimits = get(ax1, 'YLim');
 text(xLimits(1) + .05*range(xLimits), ... % x-position with 5% margin
+     yLimits(2) - .05*range(yLimits), ... % y-position with 5% margin
+     ptext, ...
+     'VerticalAlignment', 'top', ...
+     'HorizontalAlignment', 'left', ...
+     'BackgroundColor', 'white', ...
+     'EdgeColor', 'black', ...
+     'Interpreter', 'latex', ...
+     'FontSize',text_font_size);
+
+% Formatting
+%-----------
+all_axes = findall(gcf, 'type', 'axes');
+set(all_axes, 'FontSize', axis_font_size);
+
+%% Revision: Final plot for paper (2nd attempt)
+%--------------------------------------------------------------------------
+% sort subjects according to model correlation (the first row of model_r)
+% Get the indices that would sort the values in increasing ('ascend') order.
+[~, sort_indices] = sort(model_r(1, :), 'ascend');
+
+% Now, reorder all subject-specific variables using these indices.
+model_r_sorted      = model_r(:, sort_indices);
+model_r_std_sorted  = model_r_std(:, sort_indices);
+subjectnames_sorted = subjectnames(sort_indices);
+olsa_corr_sorted    = olsa_corr(:, sort_indices);
+snrs_sorted         = snrs(:, sort_indices); % Make sure to sort this variable as well
+cmap_sorted         = cmap(sort_indices, :);
+
+axis_font_size   = 16; 
+legend_font_size = 16;
+title_font_size  = 18; 
+text_font_size   = 16;
+
+x_positions = 1:n_subj;  
+bar_width   = 0.9;
+  
+% Axis Limits
+%------------
+% Limits for OLSA correlation plots (ymin, ymax)
+olsa_min   = min(olsa_corr, [], 'all');
+olsa_max   = max(olsa_corr, [], 'all');
+olsa_range = olsa_max - olsa_min;
+ymin       = olsa_min - 0.1 * olsa_range;
+ymax       = olsa_max + 0.1 * olsa_range;
+
+% Limits for SNR plot (xmin, xmax)
+snr_min   = min(snrs, [], 'all');
+snr_max   = max(snrs, [], 'all');
+snr_range = snr_max - snr_min;
+xmin      = snr_min - 0.1 * snr_range;
+xmax      = snr_max + 0.1 * snr_range;
+
+% Limits for model correlation bar plot (ymin1, ymax1) 
+model_min_bound = min(model_r - model_r_std, [], 'all');
+model_max_bound = max(model_r + model_r_std, [], 'all');
+model_range     = model_max_bound - model_min_bound;
+ymin1           = model_min_bound - 0.1 * model_range;
+ymax1           = model_max_bound + 0.1 * model_range;
+
+figure('Color', 'w');
+t = tiledlayout(2, 2, 'TileSpacing', 'loose', 'Padding', 'loose');
+ax_top = nexttile([1 2]); % --- CHANGED: This plot will span tiles 1 and 2
+hold(ax_top, 'on');
+
+% Create invisible PROTOTYPE bars for the legend
+p_sorted   = bar(ax_top, NaN, NaN, 'FaceColor', 'w', 'EdgeColor', 'k');
+p_shuffled = bar(ax_top, NaN, NaN, 'FaceColor', [0.7,0.7,0.7]);
+
+for sub_idx = 1:n_subj
+    %     b1 = bar(x_positions, model_r(1,:), bar_width, 'FaceColor', [0 0.4470 0.7410],'FaceAlpha',0.9); 
+    %     errorbar(x_positions, model_r(1,:),model_r_std(1,:), 'k', 'linestyle', 'none');
+    %     b2 = bar(x_positions, model_r(2,:), bar_width, 'FaceColor', [0.8500 0.3250 0.0980],'FaceAlpha',0.9); 
+    %     errorbar(x_positions, model_r(2,:),model_r_std(2,:), 'k', 'linestyle', 'none');
+    b1 = bar(ax_top, x_positions(sub_idx), model_r_sorted(1,sub_idx), bar_width, 'FaceColor', cmap_sorted(sub_idx,:),'FaceAlpha',0.8); 
+    errorbar(ax_top, x_positions(sub_idx), model_r_sorted(1,sub_idx), model_r_std_sorted(1,sub_idx), 'k', 'linestyle', 'none','CapSize',20,'LineWidth',1.5);
+    b2 = bar(ax_top, x_positions(sub_idx), model_r_sorted(2,sub_idx), bar_width, 'FaceColor', [0.7,0.7,0.7],'FaceAlpha',1); % always grey
+    errorbar(ax_top, x_positions(sub_idx), model_r_sorted(2,sub_idx), model_r_std_sorted(2,sub_idx), 'k', 'linestyle', 'none','CapSize',20,'LineWidth',1.5);
+
+    % Apply a subtle hatch pattern to the colored bar 
+    hatchfill2(b1, 'single', 'HatchAngle', 45, 'HatchColor', 'k', 'HatchDensity', 40, 'HatchLineWidth', 0.5);
+    
+end
+hold(ax_top, 'off');
+
+if apply_abs
+    ylabel(ax_top, sprintf("|r_{%s}|",corr_metric))
+else
+    ylabel(ax_top, sprintf("r_{%s}",corr_metric))
+end
+set(ax_top, 'xtick',1:n_subj,'xticklabel',subjectnames_sorted,'XTickLabelRotation',45);
+title(ax_top, 'Audiobook: Correlation Values', 'FontSize', title_font_size)
+grid(ax_top, 'on'); 
+grid(ax_top, 'minor'); 
+box(ax_top, 'on'); 
+ylim(ax_top, [ymin1, ymax1]);
+
+% The legendflex code anchored to the figure (gcf) is already robust and needs no changes.
+legend_labels       = {'Sorted', 'Shuffled'};
+[~, object_h]       = legendflex([p_sorted, p_shuffled], legend_labels, 'ref', ax_top, 'Anchor', {'nw','nw'}, 'Buffer', [100 -20], 'FontSize', legend_font_size);
+sorted_legend_patch = object_h(3);
+hatchfill2(sorted_legend_patch, 'single', 'HatchAngle', 45, 'HatchColor', 'k', 'HatchDensity', 40/4, 'HatchLineWidth', 0.5);
+
+% Lower Left Tile
+%----------------
+ax_snr = nexttile; 
+hold(ax_snr, 'on');
+for sub_idx = 1:n_subj
+    plot(ax_snr, snrs_sorted(:,sub_idx),olsa_corr_sorted(:,sub_idx),'LineWidth',1,'Color', cmap_sorted(sub_idx,:),'Marker', 'x','MarkerSize', 10, 'LineStyle', 'none')
+end
+xlabel(ax_snr, 'SNR / dB')
+if apply_abs
+    ylabel(ax_snr, sprintf("|r_{%s}|",corr_metric))
+else
+    ylabel(ax_snr, sprintf("r_{%s}",corr_metric))
+end
+title(ax_snr, 'OLSA: Correlation Values against SNR', 'FontSize', title_font_size)
+grid(ax_snr, 'on'); 
+grid(ax_snr, 'minor'); 
+box(ax_snr, 'on'); 
+axis(ax_snr, [xmin, xmax, ymin, ymax]);
+
+% Add p-val into plot  
+ptext   = sprintf('$r \\approx %.2f \\left[p<10^{%d}\\right]$', r_spearman1, ceil(log10(p_spearman1)));
+xLimits = get(ax_snr, 'XLim'); 
+yLimits = get(ax_snr, 'YLim');
+text(ax_snr, ...
+     xLimits(1) + .05*range(xLimits), ... % x-position with 5% margin
+     yLimits(2) - .05*range(yLimits), ... % y-position with 5% margin
+     ptext, ...
+     'VerticalAlignment', 'top', ...
+     'HorizontalAlignment', 'left', ...
+     'BackgroundColor', 'white', ...
+     'EdgeColor', 'black', ...
+     'Interpreter', 'latex', ...
+     'FontSize',text_font_size);
+
+% Lower Right Tile
+%-----------------
+ax_intelli = nexttile;
+hold(ax_intelli, 'on');
+
+for sub_idx = 1:n_subj
+    plot(ax_intelli, intelli_vec,olsa_corr_sorted(:,sub_idx),'LineWidth',1, 'Color', [cmap_sorted(sub_idx,:),0.8],'Marker','x','MarkerSize',10,'LineStyle', 'none');
+end
+errorbar(ax_intelli, intelli_vec, gavg_olsa_corr, gavg_olsa_corr_sem, 'LineWidth', 2, 'LineStyle', 'none', 'Color','k', 'Marker', 'x', 'MarkerSize', 20);
+hold(ax_intelli, 'off');
+xlabel(ax_intelli, 'Intelligibility / %')
+if apply_abs
+    ylabel(ax_intelli, sprintf("|r_{%s}|",corr_metric))
+else
+    ylabel(ax_intelli, sprintf("r_{%s}",corr_metric))
+end
+title(ax_intelli, 'OLSA: Correlation Values against Intelligibility', 'FontSize', title_font_size)
+grid(ax_intelli, 'on'); 
+grid(ax_intelli, 'minor'); 
+box(ax_intelli, 'on'); 
+axis(ax_intelli, [intelli_vec(1)-5, intelli_vec(end)+5, ymin, ymax])
+
+% Add p-val into plot  
+%--------------------
+ptext   = sprintf('$r \\approx %.2f \\left[p<10^{%d}\\right]$', r_spearman2, ceil(log10(p_spearman2)));
+xLimits = get(ax_intelli, 'XLim'); 
+yLimits = get(ax_intelli, 'YLim');
+text(ax_intelli, ...
+     xLimits(1) + .05*range(xLimits), ... % x-position with 5% margin
      yLimits(2) - .05*range(yLimits), ... % y-position with 5% margin
      ptext, ...
      'VerticalAlignment', 'top', ...

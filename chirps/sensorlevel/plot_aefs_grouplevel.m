@@ -321,10 +321,16 @@ lgd.Box = 'off';
 % Use the pre-defined handle for the bottom axes.
 axes(ax_bottom);
 hold on;
+plot_handles = gobjects(1, 2); % Pre-allocate for line handles
+
+% Calculate y-limits with 5% padding 
+min_val = min(gaefs - stderror, [], 'all');
+max_val = max(gaefs + stderror, [], 'all');
+padding = (max_val - min_val) * 0.05;
+ylims   = [min_val - padding, max_val + padding];
 
 % Define line styles for the two channels
 ga_linestyles = {'--', '-'};
-ga_legends    = cell(1, 2);
 
 % Plot grand averages with shaded error for both channels
 for i = 1:2
@@ -337,24 +343,32 @@ for i = 1:2
           'HandleVisibility', 'off'); % Exclude from legend
           
     % Plot grand average line
-    plot(timevec, gaefs(i, :), ...
-        'LineWidth', ga_line_width, ...
-        'Color', ga_color, ...
-        'LineStyle', ga_linestyles{i});
-
-    xticks(xlims(1):100:xlims(2)); % Set x-axis ticks in steps of 100 ms
-    set(gca, 'FontSize', axis_font_size); % Set font size for axis values
-
+    plot_handles(i) = plot(timevec, gaefs(i, :), ...
+                        'LineWidth', ga_line_width, ...
+                        'Color', ga_color, ...
+                        'LineStyle', ga_linestyles{i});
 end
+
+% Add patch for dipole fit timewindow and get its handle 
+timewin_dipolefit = settings.timewindow_dipfit*1000; % in ms
+patch_color = [1, 1, 0]; % A light, transparent yellow
+patch_handle      = patch([timewin_dipolefit(1), timewin_dipolefit(2), timewin_dipolefit(2), timewin_dipolefit(1)], ...
+      [ylims(1), ylims(1), ylims(2), ylims(2)], ... % Correct y-coordinates for bottom-to-top patch
+      patch_color, 'EdgeColor', 'none', 'FaceAlpha', 0.2);
+uistack(patch_handle, 'bottom'); % Send patch to the background
 
 % Apply formatting
 xlabel('t / ms', 'FontSize', label_font_size);
 ylabel(sprintf('AEF / %s',b_unit), 'FontSize', label_font_size)
 xlim(xlims);
+ylim(ylims);
+xticks(xlims(1):100:xlims(2)); % Set x-axis ticks in steps of 100 ms
+set(gca, 'FontSize', axis_font_size); % Set font size for axis values
 grid on;
 grid minor;
 box on; 
-legend(chan2plot, 'Location', 'northwest');
+% Adjust legend to include the new entry
+legend([plot_handles, patch_handle], {chan2plot{1}, chan2plot{2}, 'timewindow dipolefit'}, 'Location', 'northwest');
 hold off;
 
 % Add topoplopt

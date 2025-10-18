@@ -69,36 +69,43 @@ for sub_idx = 1:2
             fname_audio             = sprintf('task-%s_run-%s',task,run);
             audiobook_labels{f_idx} = fname_audio;
 
-            [raw_audiodata,fs] = audioread(fullfile(stim_dir_subject,[fname_audio,'_stim.wav'])); 
-    
-            if ~isequal(fs,fs_audio)
-                error('Unexpected sampling frequency in audiofile (%i)!',fs)
-            end
-    
-            % Compute auditory envelope
-            cfg      = [];
-            cfg.type = 'auditory_envelope';
-            cfg.fs   = fs_audio;
-            envelope = cal_envelope(cfg, raw_audiodata);
-    
-            % Cut into epochs and downsampling
-            % Includes intermediate downsampling step to fs_neuro and
-            % applies same filter
-            cfg              = [];
-            cfg.fs_audio     = fs_audio;
-            cfg.fs_neuro     = fs_neuro;
-            cfg.fs_down      = fs_down;
-            cfg.trialdur     = trialdur;
-            cfg.bpfreq       = bpfreq;
-            cfg.filtertype   = filtertype;
-            cfg.plotfiltresp =  'no'; 
-            envelope_epochs  = epoch_audiobook_decoding(cfg, envelope);
-            fprintf('%s: %s preprocessed.\n',subject,fname_audio)
-    
-            epochs_audio{f_idx} = envelope_epochs;
-            clear envelope_epochs raw_audiodata envelope
+            % Check for file
+            %---------------
+            if isfile(fullfile(stim_dir_subject,[fname_audio,'_stim.wav']))
 
-             f_idx = f_idx + 1;
+                [raw_audiodata,fs] = audioread(fullfile(stim_dir_subject,[fname_audio,'_stim.wav'])); 
+        
+                if ~isequal(fs,fs_audio)
+                    error('Unexpected sampling frequency in audiofile (%i)!',fs)
+                end
+        
+                % Compute auditory envelope
+                cfg      = [];
+                cfg.type = 'auditory_envelope';
+                cfg.fs   = fs_audio;
+                envelope = cal_envelope(cfg, raw_audiodata);
+        
+                % Cut into epochs and downsampling
+                % Includes intermediate downsampling step to fs_neuro and
+                % applies same filter
+                cfg              = [];
+                cfg.fs_audio     = fs_audio;
+                cfg.fs_neuro     = fs_neuro;
+                cfg.fs_down      = fs_down;
+                cfg.trialdur     = trialdur;
+                cfg.bpfreq       = bpfreq;
+                cfg.filtertype   = filtertype;
+                cfg.plotfiltresp =  'no'; 
+                envelope_epochs  = epoch_audiobook_decoding(cfg, envelope);
+                fprintf('%s: %s preprocessed.\n',subject,fname_audio)
+        
+                epochs_audio{f_idx} = envelope_epochs;
+                clear envelope_epochs raw_audiodata envelope
+
+            end % check files
+
+            % Increment counter
+            f_idx = f_idx + 1;
 
         end % loop over runs
     

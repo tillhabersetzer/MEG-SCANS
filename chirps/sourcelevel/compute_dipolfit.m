@@ -33,7 +33,7 @@
 % Checkout for additional information: https://www.fieldtriptoolbox.org/tutorial/source/dipolefitting/
 %
 % To run from the command line (linux server):
-% matlab -nodisplay -nosplash -r "compute_dipolfit; exit;"
+% matlab2024b -nodisplay -nosplash -r "compute_dipolfit; exit;"
 %--------------------------------------------------------------------------
 
 close all

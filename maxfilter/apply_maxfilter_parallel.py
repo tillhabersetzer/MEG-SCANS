@@ -41,7 +41,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 subjects  = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
-# subjects  = [4]
+# subjects  = [1]
 subjects  = [f"sub-{sub_idx:02d}" for sub_idx in subjects]
 
 tasknames = ["olsa",
@@ -54,7 +54,7 @@ tasknames = ["olsa",
              ]
 
 # path to project (needs to be adjusted)
-project_dir = Path(r"/mnt/localSSDPOOL/fiko7761/meg_scans") # / -> makes it an absolute path
+project_dir = Path(r"/mnt/localSSDPOOL/username/meg_scans") # / -> makes it an absolute path
 bids_dir = Path(project_dir,"bidsdata")
 
 # Mark bad channels to prevent noise spreading

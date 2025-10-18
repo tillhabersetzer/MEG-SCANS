@@ -20,7 +20,7 @@
 %   - Logs the entire process and total execution time.
 %
 % To run from the command line:
-% matlab -nodisplay -nosplash -r "analysis_pipeline_crosscorr; exit;"
+% matlab2024b -nodisplay -nosplash -r "analysis_pipeline_crosscorr; exit;"
 %--------------------------------------------------------------------------
 
 close all
@@ -79,11 +79,11 @@ parfor sub_idx = 1:n_subj
     % Select subject
     %---------------
     subject = sprintf('sub-%02d',subjects(sub_idx));
- 
+
     % Propecessing of audiobook MEG recordings 
     %-----------------------------------------
     preprocessing_crosscorr(subject,settings)
- 
+
     % Computation cross-correlation function
     %---------------------------------------
     computation_crosscorr(subject,settings)

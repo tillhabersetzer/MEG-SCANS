@@ -158,8 +158,15 @@ end
 %% Train decoder on audio books
 %--------------------------------------------------------------------------
 
+% Have at least 2 test trials so that they can be permuted for shuffled
+% condition
 n_trials_train = ceil(settings.decoding.decoder.n_portion_training*n_trials); % number of training trials
 n_trials_test  = n_trials - n_trials_train; % number of test trials
+
+if n_trials_test ==1
+    n_trials_test = 2; % +1
+    n_trials_train = n_trials_train - 1;
+end
 
 % Cross-validation for optimization
 %----------------------------------
@@ -241,6 +248,10 @@ epochs_audio_sorted = epochs_audio_audiobook(p(n_trials_train+1:end));
 idx_shuffle = randperm(n_trials_test); % for random mapping of audiodata
 
 % check if no elements are identical, so the difference should never be 0
+if n_trials_test == 1
+    error('Number of test trials must be larger than 1!')
+end
+
 while ~all(idx_shuffle-(1:n_trials_test)) % check for nonzero elements
     idx_shuffle = randperm(n_trials_test);
 end

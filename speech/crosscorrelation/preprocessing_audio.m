@@ -68,32 +68,38 @@ for sub_idx = 1:2
             fname_audio             = sprintf('task-%s_run-%s',task,run);
             audiobook_labels{f_idx} = fname_audio;
 
-            [raw_audiodata,fs] = audioread(fullfile(stim_dir_subject,[fname_audio,'_stim.wav'])); 
+            % Check for file
+            %---------------
+            if isfile(fullfile(stim_dir_subject,[fname_audio,'_stim.wav']))
+
+                [raw_audiodata,fs] = audioread(fullfile(stim_dir_subject,[fname_audio,'_stim.wav'])); 
+        
+                if ~isequal(fs,fs_audio)
+                    error('Unexpected sampling frequency in audiofile (%i)!',fs)
+                end
     
-            if ~isequal(fs,fs_audio)
-                error('Unexpected sampling frequency in audiofile (%i)!',fs)
-            end
+                % Compute onset envelope
+                cfg              = [];
+                cfg.type         = 'onset_envelope';
+                cfg.fs           = fs_audio;
+                cfg.lpfreq       = lpfreq;
+                cfg.lpfiltord    = lpfiltord;
+                cfg.filtertype   = filtertype;
+                cfg.plotfiltresp = 'no';
+                envelope         = cal_envelope(cfg, raw_audiodata);
+    
+                % Cut into epochs and downsampling
+                cfg             = [];
+                cfg.fs_audio    = fs_audio;
+                cfg.trialdur    = trialdur;
+                cfg.fs_down     = fs_down;
+                envelope_epochs = epoch_audiobook_crosscorr(cfg, envelope);
+                fprintf('%s: %s preprocessed.\n',subject,fname_audio)
+    
+                epochs_audio{f_idx} = envelope_epochs;
+                clear envelope_epochs raw_audiodata envelope
 
-            % Compute onset envelope
-            cfg              = [];
-            cfg.type         = 'onset_envelope';
-            cfg.fs           = fs_audio;
-            cfg.lpfreq       = lpfreq;
-            cfg.lpfiltord    = lpfiltord;
-            cfg.filtertype   = filtertype;
-            cfg.plotfiltresp = 'no';
-            envelope         = cal_envelope(cfg, raw_audiodata);
-
-            % Cut into epochs and downsampling
-            cfg             = [];
-            cfg.fs_audio    = fs_audio;
-            cfg.trialdur    = trialdur;
-            cfg.fs_down     = fs_down;
-            envelope_epochs = epoch_audiobook_crosscorr(cfg, envelope);
-            fprintf('%s: %s preprocessed.\n',subject,fname_audio)
-
-            epochs_audio{f_idx} = envelope_epochs;
-            clear envelope_epochs raw_audiodata envelope
+            end % check files
 
             % Increment counter
             f_idx = f_idx + 1;
@@ -101,6 +107,11 @@ for sub_idx = 1:2
         end % loop over runs
     
     end % loop over tasks
+
+    % Remove empty entries
+    %---------------------
+    % epochs_audio     = epochs_audio(~cellfun(@isempty, epochs_audio));
+    % audiobook_labels = epochs_audio(~cellfun(@isempty, audiobook_labels));
 
     % Save results
     %--------------

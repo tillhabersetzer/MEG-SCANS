@@ -4,20 +4,34 @@
 % till.habersetzer@uol.de 
 % 
 % Description:
-%   Analyzes and visualizes MEG cross-correlation results, focusing on the
-%   statistical comparison between an actual condition and a shuffled null
-%   condition.
+%   This script performs a comprehensive analysis and visualization of MEG
+%   cross-correlation data. It focuses on comparing a primary experimental
+%   condition ('sorted') against a shuffled null condition to identify
+%   statistically significant differences. The analysis uses FieldTrip's
+%   cluster-based permutation statistics and generates a wide range of plots
+%   to inspect the data at both the grand-average and single-subject level.
 %
-%   Key Steps:
-%   -   Loads pre-computed, subject-level and grand-average cross-correlation
-%       data for both conditions.
-%   -   Performs a cluster-based permutation t-test to identify significant
-%       time-channel clusters where the conditions differ.
-%   -   Generates a suite of visualizations, including:
-%       - Topographical plots of grand-average waveforms.
-%       - Topographical maps of statistical results (t-values, clusters).
-%       - Time-series plots of selected channels showing individual and
-%         grand-average data.
+%   Key Features & Visualizations:
+%   1.  Data Loading: Imports pre-computed cross-correlation results for
+%       individual subjects and the grand average.
+%   2.  Trial Count Summary: Plots a bar chart of the number of trials
+%       retained for each subject.
+%   3.  Waveform Visualization: Creates topographical plots of grand-average
+%       waveforms for both magnetometers and gradiometers, overlaying the
+%       sorted, shuffled, and difference waves.
+%   4.  Statistical Analysis: Conducts a cluster-based permutation t-test
+%       to find significant time-channel clusters where the sorted and
+%       shuffled conditions differ.
+%   5.  Statistical Visualization:
+%       -   Generates topographical plots of t-values, highlighting
+%           significant clusters within specific time windows.
+%       -   Plots the full time-course of the statistical results.
+%   6.  Detailed Channel Plots: For a selection of channels, it visualizes
+%       the time-series showing the grand-average with SEM error bands and
+%       the data from all individual subjects.
+%   7.  Butterfly Plots: Overlays the waveforms from all sensors to provide
+%       a global view, including a version where channels are color-coded
+%       by their anatomical region (e.g., temporal, frontal).
 %--------------------------------------------------------------------------
 
 close all
@@ -74,6 +88,7 @@ if ~isequal(n_subj_gavg,n_subj)
 end
 
 % Compute raweffect
+%------------------
 cfg                      = [];
 cfg.operation            = 'subtract';
 cfg.parameter            = 'avg';
@@ -119,6 +134,9 @@ title('gavg: gradiometer')
 
 %% Calculate cluster-based permutation statistic and show clusters
 %--------------------------------------------------------------------------
+% Within-subjects experiment (within-UO design)
+% null hypothesis: the probability distribution of the condition-specific averages 
+%                  is independent of the experimental conditions.
 
 % choose sensors
 %---------------
@@ -147,29 +165,27 @@ ft_neighbourplot(cfg)
 cfg                         = [];
 cfg.channel                 = sensortype;
 cfg.method                  = 'montecarlo';
-cfg.statistic               = 'ft_statfun_depsamplesT';
-cfg.correctm                = 'cluster';
-cfg.clusteralpha            = 0.05;
+cfg.statistic               = 'depsamplesT'; % the dependent samples T-statistic (within-UO)
+cfg.correctm                = 'cluster'; %  MCP by calculating a so-called cluster-based test statistic 
+cfg.clusteralpha            = 0.05; % alpha level of the sample-specific test statistic that will be used for thresholding
 cfg.clusterstatistic        = 'maxsum';
-cfg.minnbchan               = 3; % megmag = 2, megplanar 3, meg = 4 
-cfg.tail                    = 0;
+cfg.minnbchan               = 2; % megmag = 2, megplanar 3, meg = 4 / % minimum number of neighborhood channels that is required for a selected sample to be included
+cfg.tail                    = 0; % -1, 1 or 0 (default = 0); one-sided or two-sided test
 cfg.clustertail             = 0;
-cfg.alpha                   = 0.025;
+cfg.alpha                   = 0.025; % alpha level of the permutation test
 cfg.numrandomization        = 5000;
 cfg.neighbours              = neighbours;
 design                      = zeros(2,2*n_subj);
-design(1,1:n_subj)          = 1;
-design(1,n_subj+1:2*n_subj) = 2;
-design(2,1:n_subj)          = 1:n_subj;
-design(2,n_subj+1:2*n_subj) = 1:n_subj;
+design(1,:)                 = [1:n_subj 1:n_subj];
+design(2,:)                 = [ones(1,n_subj) ones(1,n_subj)*2];
 
 cfg.design = design;
-cfg.ivar   = 1; % row of design matrix that contains independent variable 
-cfg.uvar   = 2; % row of design matrix that contains unit of observation
+cfg.uvar   = 1; % row of design matrix that contains unit of observation
+cfg.ivar   = 2; % row of design matrix that contains independent variable 
 
 stat = ft_timelockstatistics(cfg,avgs_crosscorr{:},avgs_crosscorr_shuffled{:});
 
-% Show clusters
+% Show a specific cluster 
 %--------------------------------------------------------------------------
 cluster_number = 1;
 pos            = any(ismember(stat.posclusterslabelmat,cluster_number),2);
@@ -192,13 +208,12 @@ cfg.interactive      = 'no';
 ft_topoplotER(cfg,stat);
 colormap(bluewhitered)
 
-%% Visualize Statistic
+%% Visualize Statistic over time
 %--------------------------------------------------------------------------
 
 % Set alpha-value for mask
 %-------------------------
-% alpha_mask = 0.025;
-alpha_mask = 0.001;
+alpha_mask = 0.025;
 mask       = give_stat_mask(stat,alpha_mask);
 stat.mask  = mask;
 
@@ -208,26 +223,38 @@ stat.mask  = mask;
 
 % Time windows for topoplots
 %---------------------------
-% windows = [-0.1,0;0,0.1;0.1,0.2;0.2,0.3;0.3,0.4;0.4,0.5;0.5,0.6;...
-%            0.6,0.7;0.7,0.8;0.8,0.9];
-windows = [-0.1,-0.05;-0.05,0;0,0.05;0.05,0.1;0.1,0.15;0.15,0.2;0.2,0.25;0.25,0.3;0.3,0.35;0.35,0.4;...
-           0.4,0.5;0.5,0.6;0.6,0.7;0.7,0.8;0.8,0.9];     
-idx     = dsearchn(stat.time',reshape(windows,1,numel(windows))');
-idx     = reshape(idx,size(windows,1),size(windows,2));
-maxval  = max(abs(stat.stat),[],'all');
+timewindows_statistic = [50, 90; 160, 230]/1000; % sec
+
+time_idx = dsearchn(stat.time',reshape(timewindows_statistic,1,numel(timewindows_statistic))');
+time_idx = reshape(time_idx,size(timewindows_statistic,1),size(timewindows_statistic,2));
+
+minval = min(gavg_crosscorr_raweffect.avg(:));
+maxval = max(gavg_crosscorr_raweffect.avg(:));
 
 % Plot over statistic
 %--------------------
+% First ensure the channels to have the same order in the average and in the statistical output.
+% This might not be the case, because ft_math might shuffle the order
+[i1,i2] = match_str(gavg_crosscorr_raweffect.label, stat.label);
+
 figure('Color', 'w')
-for p_idx = 1:15
-   subplot(3,5,p_idx);
-   cfg      = [];
-   cfg.xlim = windows(p_idx,:);  
-   cfg.zlim = [-maxval,maxval];
+% Pre-allocate an array to store the handles of the subplots
+ax = gobjects(1, size(timewindows_statistic,1));
+
+for p_idx = 1:size(timewindows_statistic,1) 
+
+   chan2highlight       = zeros(numel(gavg_crosscorr_raweffect.label),1);
+   chan2highlight(i1)   = all(stat.mask(i2, time_idx(p_idx,1):time_idx(p_idx,2)), 2);
+   % less strict
+   % chan2highlight(i1)   = any(stat.mask(i2,time_idx(p_idx,1):time_idx(p_idx,2)), 2); 
+
+   % Store the handle of the current subplot
+   ax(p_idx)            = subplot(1,2,p_idx);
+
+   cfg                  = [];
+   cfg.xlim             = timewindows_statistic(p_idx,:);  
+   cfg.zlim             = [minval,maxval];
    cfg.highlight        = 'on';
-   chan2highlight       = all(stat.mask(:,idx(p_idx,1):idx(p_idx,2)), 2); % all samples must be significant during timeinterval
-   % less severe
-   % chan2highlight       = any(stat.mask(:,idx(p_idx,1):idx(p_idx,2)), 2); 
    cfg.highlightchannel = find(chan2highlight);
    cfg.highlightcolor   = 'k';
    cfg.highlightsize    = 50;
@@ -236,21 +263,20 @@ for p_idx = 1:15
    cfg.commentpos       = 'title';
    cfg.layout           = layout;
    cfg.interactive      = 'no';
-   cfg.parameter        = 'stat';
-   cfg.figure           = gcf;
-   ft_topoplotER(cfg, stat);
-   set(gca,'ColorScale','linear') % if you want to plot on a logarithmic scale
-   set(gca,'fontsize', 12)
+   cfg.figure           = gca; % Use the current axes handle
+   ft_topoplotER(cfg, gavg_crosscorr_raweffect);
    colormap(bluewhitered)
 end
-posi        = get(subplot(3,5,10),'Position'); %[left bottom width height]
-posi(1)     = posi(1)+posi(3)+0.01; posi(3) = 0.25*posi(3);
-c           = colorbar('Position',posi);
+
+% Get the position of the second subplot using its stored handle
+pos2        = get(ax(2), 'Position'); % [left, bottom, width, height]
+c           = colorbar;
+c.Position  = [pos2(1) + pos2(3) + 0.02, pos2(2), 0.03, pos2(4)]; % [left, bottom, width, height]
 c.LineWidth = 1;
 c.FontSize  = 15;
-title(c,'t-Wert','fontweight','bold');
-% set(c,'Ticks',[0.1,1,2,3,4,5,8],'TickLabels',{'0.1','1','2','3','4','5','8'})
-sgtitle(sprintf('%s: t-values',sensortype),'fontweight','bold','FontSize',20)
+title(c, '$\hat{R}$', 'fontweight', 'bold', 'Interpreter', 'latex');
+
+sgtitle(sprintf('%s: Correlation-values condition contrast', sensortype), 'fontweight', 'bold', 'FontSize', 20);
 
 % Crosscorrelation timeseries with statistic
 %-------------------------------------------
@@ -262,7 +288,7 @@ cfg.graphcolor    = 'r';
 figure('Color', 'w')
 ft_multiplotER(cfg,stat);
 
-sgtitle(sprintf('%s: t-values',sensortype),'fontweight','bold','FontSize',20)
+sgtitle(sprintf('%s: Cluster-based permutation test ',sensortype),'fontweight','bold','FontSize',20)
 
 %% Visualize cross correlation timeseries of both conditions
 %--------------------------------------------------------------------------
@@ -276,32 +302,34 @@ gavg_crosscorr_shuffled_sem = sqrt(gavg_crosscorr_shuffled.var) ./ sqrt(gavg_cro
 %--------------------------------------------------------------------------
 
 % channels to plot
-chan2plot              = {'MEG0341','MEG0231','MEG1611','MEG1221','MEG1341','MEG2421'};
+chan2plot              = {'MEG0341','MEG1221','MEG0231','MEG1341','MEG1611','MEG2421'};
 n_chan                 = length(chan2plot);
 error_alpha            = 0.2; % Shaded error area transparency
 timevec                = gavg_crosscorr.time*1000;
 subject_alpha          = 0.6;
 subject_color          = [0.8, 0.8, 0.8]; 
 subject_color_shuffled = [0.5, 0.5, 0.5]; 
-axis_font_size         = 18; 
-legend_font_size       = 16;
-title_font_size        = 18; 
+axis_font_size         = 16; 
+legend_font_size       = 18;
+title_font_size        = 14; 
 
 xlims  = [-100,900];
 idx    = find(contains(gavg_crosscorr.label,chan2plot));
 minval = min(gavg_crosscorr.avg(idx,:)-gavg_crosscorr_sem(idx,:),[],'all');
 maxval = max(gavg_crosscorr.avg(idx,:)+gavg_crosscorr_sem(idx,:),[],'all');
+% ylims  = [-0.02,0,0.02];
 
 figure('Color', 'w')
+t = tiledlayout(3, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 axis_handles = gobjects(1, n_chan); % Pre-allocate an array for axis handles
 for ch_idx = 1:n_chan
 
     chan_name = chan2plot{ch_idx};
     idx       = find(contains(gavg_crosscorr.label,chan_name));
 
-    subplot(3,2,ch_idx);
-    axis_handles(ch_idx) = gca; % Store the current axes handle
-    hold on
+    % Go to the next tile (subplot) 
+    axis_handles(ch_idx) = nexttile;
+    hold on;
 
     % Plot individual subjects
     for sub_idx = 1:n_subj
@@ -318,11 +346,14 @@ for ch_idx = 1:n_chan
     ft_plot_vector(timevec, [gavg_crosscorr.avg(idx,:) + gavg_crosscorr_sem(idx,:); gavg_crosscorr.avg(idx,:) - gavg_crosscorr_sem(idx,:)], 'highlightstyle', 'difference', 'facealpha', error_alpha, 'facecolor', 'b')
     plt2 = ft_plot_vector(timevec, gavg_crosscorr.avg(idx,:), 'color', 'b', 'linewidth', 2, 'style', '-');
 
-    xlabel('t / ms')
+    if ch_idx > 4
+        xlabel('t / ms')
+    end
     ylabel('$\hat{R}$','Interpreter','Latex')
     title(chan_name, 'FontSize', title_font_size)
 
     xticks(xlims(1):200:xlims(2)); % Set x-axis ticks in steps of 100 ms
+    % yticks(ylims);
     set(gca, 'FontSize', axis_font_size); % Set font size for axis values
     
     grid on;
@@ -330,9 +361,13 @@ for ch_idx = 1:n_chan
     box on; 
 
     % Add legend only for the first subplot
-    % if ch_idx == 1
+    if ch_idx == 1
         legend([plt1, plt2],{'shuffled','sorted'},'Interpreter', 'none','Location','Southeast','FontSize',legend_font_size)
-    % end
+    end
+
+    if ch_idx <= 4
+        xticklabels([]); % Hides the numbers, but keeps grid lines 
+    end
 end
 % Link the X-axes of all subplots
 linkaxes(axis_handles, 'xy');
@@ -340,23 +375,8 @@ linkaxes(axis_handles, 'xy');
 ylims  = [minval, maxval]; % Centralized Y-axis limits
 set(axis_handles, 'XLim', xlims, 'YLim', ylims);
 
-% Highlight channels in topoplot
-%-------------------------------
-figure('Color', 'w')
-cfg                  = [];
-cfg.comment          = 'xlim';
-cfg.xlim             = [0.06,0.1]; %[0.1,0.2]; ; %[0.095,0.125]; [0.08,0.08];
-cfg.highlight        = 'on';
-cfg.highlightchannel  = chan2plot;
-cfg.highlightcolor   = 'k';
-cfg.highlightsize    = 60;
-cfg.highlightsymbol  = '.';
-cfg.layout           = 'neuromag306all_helmet.lay';
-cfg.interactive      = 'no';
-cfg.colorbar         = 'yes';
-ft_topoplotER(cfg,gavg_crosscorr_shuffled);
-colormap(bluewhitered)
-
+% Cross-correlation timeseries
+%-----------------------------
 figure('Color', 'w')
 cfg             = [];
 cfg.showlabels  = 'yes';
@@ -365,11 +385,176 @@ cfg.layout      = 'neuromag306mag_helmet.lay';
 % cfg.layout     = 'neuromag306planar_helmet.lay';
 cfg.linestyle   = {'-','-'};
 cfg.linecolor   = 'rb'; % shuffled: red, sorted: blue
-cfg.showlabels  = 'off';
+cfg.showlabels  = 'on';
 cfg.showcomment = 'off';
 cfg.showscale   = 'off';
 cfg.linewidth   = 1;
 ft_multiplotER(cfg,gavg_crosscorr_shuffled,gavg_crosscorr);
+
+%% Visualize cross correlations
+%--------------------------------------------------------------------------
+
+sensortype = 'megmag';
+% sensortype = 'megplanar';
+
+switch sensortype
+    case 'megmag'
+        is_sensor  = endsWith(gavg_crosscorr.label, '1');
+        is_sensor2 = endsWith(gavg_crosscorr_shuffled.label, '1');
+
+    case 'megplanar'
+        is_sensor  = endsWith(gavg_crosscorr.label, '2') | endsWith(gavg_crosscorr.label, '3');
+        is_sensor2 = endsWith(gavg_crosscorr_shuffled.label, '2') | endsWith(gavg_crosscorr_shuffled.label, '3');
+end
+% Check if the two logical arrays are identical. If not, throw an error.
+if ~isequal(is_sensor, is_sensor2)
+    error('Mismatch in sensor labels: The order or type of channels in the two datasets does not match.');
+end
+
+n_channels = sum(is_sensor);
+timevec    = gavg_crosscorr.time*1000; 
+xlims      = [-100,900];
+
+axis_font_size   = 16; 
+legend_font_size = 16;
+title_font_size  = 18; 
+
+% All channels same color
+%--------------------------------------------------------------------------
+figure;
+h1 = plot(timevec, gavg_crosscorr.avg(is_sensor,:), 'b', 'LineWidth', 1);
+hold on;
+h2 = plot(timevec, gavg_crosscorr_shuffled.avg(is_sensor,:), 'r', 'LineWidth', 1);
+hold off; 
+xlabel('t / ms')
+ylabel('$\hat{R}$','Interpreter','Latex')
+title('Comparison of Original and Shuffled Cross-Correlations');
+xticks(xlims(1):200:xlims(2)); % Set x-axis ticks in steps of 100 ms
+set(gca, 'FontSize', axis_font_size); % Set font size for axis values
+
+legend([h1(1), h2(1)], {'Sorted', 'Shuffled'}, 'Location', 'Southeast');
+grid on;
+grid minor;
+box on; 
+
+% Color grouped by sensor location
+%--------------------------------------------------------------------------
+channel_layout_meg    = importdata('channel_layout_meg.mat');
+channel_subsets       = cell(1,4);
+channel_subsets{4}    = unique([channel_layout_meg.occipital_left(:); channel_layout_meg.occipital_right(:)]); % occipital_channels
+channel_subsets{3}    = unique([channel_layout_meg.parietal_left(:); channel_layout_meg.parietal_right(:)]); % parietal_channels
+channel_subsets{2}    = unique([channel_layout_meg.frontal_left(:); channel_layout_meg.frontal_right(:)]); % frontal channels
+channel_subsets{1}    = unique([channel_layout_meg.temporal_left(:); channel_layout_meg.temporal_right(:)]); % temporal channels
+channel_subsets_label = {'Sorted (temporal)','Sorted (frontal)','Sorted (parietal)','Sorted (occipital)'};
+
+cmap = [
+    0.0000    0.2980    0.5294;    % Dark Blue (#004C87)
+    0.2000    0.7451    0.9333;    % Cyan (#33BEE7)
+    0.4660    0.6740    0.1880;    % Green (#77AB30)
+    0.9290    0.5940    0.1920     % Orange (#ED9731)
+];
+
+line_styles = {'-','--',':','-.'};
+% line_styles = {'-','-','-','-'};
+
+% Compute limits
+%---------------
+all_data = [gavg_crosscorr.avg(is_sensor,:); gavg_crosscorr_shuffled.avg(is_sensor,:)];
+
+% 2. Find the absolute min and max across all the data
+min_val = min(all_data(:));
+max_val = max(all_data(:));
+clear all_data
+
+data_range = max_val - min_val;
+padding    = 0.05 * data_range;
+yLims      = [min_val - padding, max_val + padding];
+
+figure;
+subplot(2,1,1)
+hold on;
+
+% Pre-allocate a vector to store plot handles for the legend
+h = gobjects(1, length(channel_subsets) + 2);
+
+for loc_idx = 1:length(channel_subsets)
+
+    subset_idx = contains(gavg_crosscorr.label, channel_subsets{loc_idx});
+  
+    chan_idx     = and(is_sensor,subset_idx); % channel type + subsets
+    plot_handles = plot(timevec, gavg_crosscorr.avg(chan_idx,:), 'color', cmap(loc_idx,:), 'LineWidth', 1, 'LineStyle', line_styles{loc_idx});
+
+    % Save only the FIRST handle from this group for the legend
+    if ~isempty(plot_handles)
+        h(loc_idx) = plot_handles(1);
+    end
+
+end
+plot_handles = plot(timevec, gavg_crosscorr_shuffled.avg(is_sensor,:), 'color', 'r', 'LineWidth', 1);
+h(length(channel_subsets)+1) = plot_handles(1);
+
+% Define patch properties
+patchColor = [1, 1, 0]; % A light, transparent yellow
+patchAlpha = 0.2;
+
+% Create the first patch for the 50-90ms window
+p1 = patch([timewindows_statistic(1,1), timewindows_statistic(1,2), timewindows_statistic(1,2), timewindows_statistic(1,1)]*1000, [yLims(1), yLims(1), yLims(2), yLims(2)], ...
+           patchColor, 'FaceAlpha', patchAlpha, 'EdgeColor', 'none');
+h(end) = p1;
+% Create the second patch for the 160-230ms window
+p2 = patch([timewindows_statistic(2,1), timewindows_statistic(2,2), timewindows_statistic(2,2), timewindows_statistic(2,1)]*1000, [yLims(1), yLims(1), yLims(2), yLims(2)], ...
+           patchColor, 'FaceAlpha', patchAlpha, 'EdgeColor', 'none');
+           
+% Send the patches to the background, behind the data lines
+uistack([p1, p2], 'bottom');
+
+hold off; 
+xlabel('t / ms')
+ylabel('$\hat{R}$','Interpreter','Latex')
+title('Butterfly plot cross-correlation functions');
+xticks(xlims(1):200:xlims(2)); % Set x-axis ticks in steps of 100 ms
+set(gca, 'FontSize', axis_font_size); % Set font size for axis values
+ylim(yLims)
+
+legend(h, [channel_subsets_label, 'Shuffled', 'time window statistic'], 'Location', 'Southeast', 'NumColumns', 5);
+grid on;
+grid minor;
+box on; 
+
+% Create dummy data for mapping color coding of sensors
+%------------------------------------------------------
+dummy_data      = gavg_crosscorr_raweffect;
+dummy_data.time = 0;
+dummy_data.avg  = zeros(306,1);
+
+for loc_idx = 1:length(channel_subsets)
+
+    subset_idx                 = contains(dummy_data.label, channel_subsets{loc_idx});
+    dummy_data.avg(subset_idx) = loc_idx;
+
+end
+
+% Highlight channels in topoplot
+%-------------------------------
+fig = figure('Color', 'w');
+hold on
+cfg                  = [];
+cfg.comment          = 'no';
+cfg.xlim             = [0,0]; 
+cfg.markersize       = 20;
+cfg.markersymbol     = '.';
+cfg.highlight        = 'on';
+cfg.highlightchannel  = chan2plot;
+cfg.highlightcolor   = 'k';
+cfg.highlightsize    = 50;
+cfg.highlightsymbol  = '.';
+cfg.layout           = 'neuromag306mag_helmet.lay';
+cfg.interactive      = 'no';
+cfg.colorbar         = 'yes';
+cfg.interpolation    = 'nearest';
+cfg.figure           = fig;
+ft_topoplotER(cfg,dummy_data); % plot difference
+colormap(cmap)
 
 
 %% Functions

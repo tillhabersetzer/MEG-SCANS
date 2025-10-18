@@ -13,7 +13,7 @@
 % average across all participants.
 %
 % To run from the command line (linux server):
-% matlab -nodisplay -nosplash -r "compute_aefs; exit;"
+% matlab2024b -nodisplay -nosplash -r "compute_aefs; exit;"
 %--------------------------------------------------------------------------
 
 close all
