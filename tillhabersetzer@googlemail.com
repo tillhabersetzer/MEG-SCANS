@@ -7,7 +7,7 @@ This repository contains the code used for the technical validation and generati
 The MEG-SCANS (Stories, Chirps, And Noisy Sentences) dataset provides raw magnetoencephalography (MEG) recordings from 24 German-speaking subjects. Each subject listened to approximately one hour of stimuli, including two audiobooks, sentences from the Oldenburger Matrix Sentence Test (OLSA) for Speech Reception Threshold (SRT) assessment, and short up-chirps used to assess MEG signal quality. The dataset comprises MEG data, corresponding audio material (audiobooks,  envelopes, and chirp stimuli), and behavioral audiogram and SRT results from hearing screenings. Organized according to the Brain Imaging Data Structure (BIDS), this resource offers a robust benchmark for large-scale encoding/decoding analyses of temporally-resolved brain responses to speech. Comprehensive Matlab and Python code are included to replicate key data validations, ensuring transparency and reproducibility.
 
 * **Dataset:** [doi:10.18112/openneuro.ds006468.v1.0.0](https://doi.org/10.18112/openneuro.ds006468.v1.0.0)
-* **Data Descriptor Paper:** [DOI to data descriptor paper]
+* **Data Descriptor Paper:** [doi.org/10.1038/s41597-025-06397-4](https://doi.org/10.1038/s41597-025-06397-4)
 * **Code archived with Zenodo:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17397581.svg)](https://doi.org/10.5281/zenodo.17397581)
 
 
